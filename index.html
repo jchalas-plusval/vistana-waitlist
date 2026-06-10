@@ -268,6 +268,23 @@ tr:hover td{background:#fafaf7}
 .lg-btn:hover{background:#d4870f}
 .lg-err{font-size:11px;color:var(--red);text-align:center;margin-top:7px;display:none}
 
+/* PROCESO CHECKLIST */
+.proc-wrap{background:var(--cream);border-radius:var(--r);padding:10px 14px;margin-bottom:12px}
+.proc-title{font-size:10px;font-weight:600;color:var(--warm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.proc-steps{display:flex;flex-direction:column;gap:5px}
+.ps{display:flex;align-items:center;gap:9px;padding:7px 10px;background:#fff;border-radius:7px;border:1.5px solid var(--stone);cursor:pointer;transition:all .15s;user-select:none}
+.ps:hover{border-color:var(--lime-d)}
+.ps.done{background:var(--green-l);border-color:var(--green)}
+.ps-num{width:20px;height:20px;border-radius:50%;background:var(--stone);color:var(--warm);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ps.done .ps-num{background:var(--green);color:#fff}
+.ps-lbl{font-size:12px;color:var(--warm);flex:1}
+.ps.done .ps-lbl{color:var(--green-d);font-weight:500}
+.ps-date{font-size:9px;color:var(--warm);white-space:nowrap}
+.ps-ico{font-size:14px;opacity:0}
+.ps.done .ps-ico{opacity:1}
+.proc-bar-wrap{height:4px;background:var(--stone);border-radius:20px;margin-bottom:10px;overflow:hidden}
+.proc-bar{height:100%;border-radius:20px;transition:width .3s}
+
 /* RESP */
 @media(max-width:768px){.ugrid{grid-template-columns:repeat(4,1fr)}.kpis{grid-template-columns:repeat(3,1fr)}.frow{grid-template-columns:1fr}.main{padding:1.25rem 1rem 3rem}.hdr{padding:0 1rem}}
 @media(max-width:480px){.ugrid{grid-template-columns:repeat(2,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.tabs{width:100%}.tb{flex:1;padding:7px 8px;justify-content:center}}
@@ -338,7 +355,7 @@ tr:hover td{background:#fafaf7}
     </div>
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Unidad</th><th>Cliente</th><th>Cédula</th><th>Asesor</th><th>Precio</th><th>Estado</th><th>Cédula/Doc</th><th>Comprobante</th><th>Fecha</th><th>Notas</th></tr></thead>
+        <thead><tr><th>Unidad</th><th>Cliente</th><th>Cédula</th><th>Asesor</th><th>Precio</th><th>Estado</th><th>Cédula/Doc</th><th>Comprobante</th><th>D.D.</th><th>C.O.C.</th><th>10%</th><th>Fecha</th><th>Notas</th></tr></thead>
         <tbody id="tbl-body"></tbody>
       </table>
       <div id="tbl-empty" class="empty-s" style="display:none"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/></svg><p>No hay registros.</p></div>
@@ -350,9 +367,8 @@ tr:hover td{background:#fafaf7}
     <div class="wl-wrap">
       <div class="wl-hd">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-        Lista de Espera
+        Lista de Espera — Edificio D
       </div>
-      <div id="wl-edif-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem"></div>
       <p class="wl-sub">Pisos 2–8 · 8 unidades por piso · Máx. 3 personas por unidad · Clic en una unidad para registrar</p>
       <div class="wl-leg">
         <div class="wll"><div class="wllsq" style="background:#fff;border:1.5px solid #e8e4d9"></div>Sin interés</div>
@@ -387,7 +403,7 @@ tr:hover td{background:#fafaf7}
 
 <script>
 /* ═══════════ CONFIG ═══════════ */
-const SCRIPT_URL        = 'https://script.google.com/macros/s/AKfycbwwsU3Zf69U0pDKHFixWFWIWb00Egq5gcgYRZz1y-U5hzcx7Z-Y3QtjfVu6tAHYoOvh7w/exec';
+const SCRIPT_URL        = 'https://script.google.com/macros/s/AKfycbziFLez79GXM5BcRb0EGN_hOf4D-_qm6_EFqkhqsNILtA_cHt25Lu8CJdCq9caBYd3Z/exec';
 const FOLDER_CEDULAS    = '13CWabEbAkHZh7Sl2ppuJptDrJTUTPZOA';
 const FOLDER_COMP       = '1B4wAeJfwrwazQ8s2PP6yUKtsRDW9ipTl';
 const SHEET_VENTAS      = '1tpr9HcPsiIy48KJKecC0nVTfxp_h1YITIA-_hUaCBYA';
@@ -396,32 +412,29 @@ const ADMIN_PASS        = 'plusval2025';
 const COORD_PASS        = 'coord2025';
 const BLOQUEO_H         = 24;
 const WL_MAX            = 3;
-// 17 edificios A-Q — activos/inactivos controlados por admin
 const EDIFICIOS_CONFIG = {
-  'A': {nombre:'Edificio A', activoVentas:false, activoWL:false},
-  'B': {nombre:'Edificio B', activoVentas:true,  activoWL:false},
-  'C': {nombre:'Edificio C', activoVentas:true,  activoWL:false},
-  'D': {nombre:'Edificio D', activoVentas:true,  activoWL:true},
-  'E': {nombre:'Edificio E', activoVentas:false, activoWL:false},
-  'F': {nombre:'Edificio F', activoVentas:false, activoWL:false},
-  'G': {nombre:'Edificio G', activoVentas:false, activoWL:false},
-  'H': {nombre:'Edificio H', activoVentas:false, activoWL:false},
-  'I': {nombre:'Edificio I', activoVentas:false, activoWL:false},
-  'J': {nombre:'Edificio J', activoVentas:false, activoWL:false},
-  'K': {nombre:'Edificio K', activoVentas:false, activoWL:false},
-  'L': {nombre:'Edificio L', activoVentas:false, activoWL:false},
-  'M': {nombre:'Edificio M', activoVentas:false, activoWL:false},
-  'N': {nombre:'Edificio N', activoVentas:false, activoWL:false},
-  'O': {nombre:'Edificio O', activoVentas:false, activoWL:false},
-  'P': {nombre:'Edificio P', activoVentas:false, activoWL:false},
-  'Q': {nombre:'Edificio Q', activoVentas:false, activoWL:false},
+  'A':{nombre:'Edificio A',vta:false,wl:false},
+  'B':{nombre:'Edificio B',vta:true, wl:false},
+  'C':{nombre:'Edificio C',vta:true, wl:false},
+  'D':{nombre:'Edificio D',vta:true, wl:true},
+  'E':{nombre:'Edificio E',vta:false,wl:false},
+  'F':{nombre:'Edificio F',vta:false,wl:false},
+  'G':{nombre:'Edificio G',vta:false,wl:false},
+  'H':{nombre:'Edificio H',vta:false,wl:false},
+  'I':{nombre:'Edificio I',vta:false,wl:false},
+  'J':{nombre:'Edificio J',vta:false,wl:false},
+  'K':{nombre:'Edificio K',vta:false,wl:false},
+  'L':{nombre:'Edificio L',vta:false,wl:false},
+  'M':{nombre:'Edificio M',vta:false,wl:false},
+  'N':{nombre:'Edificio N',vta:false,wl:false},
+  'O':{nombre:'Edificio O',vta:false,wl:false},
+  'P':{nombre:'Edificio P',vta:false,wl:false},
+  'Q':{nombre:'Edificio Q',vta:false,wl:false},
 };
-// Load saved config from localStorage (admin changes persist)
-const savedConfig = JSON.parse(localStorage.getItem('vcb_edif_config') || 'null');
-if (savedConfig) { Object.keys(savedConfig).forEach(k => { if(EDIFICIOS_CONFIG[k]) Object.assign(EDIFICIOS_CONFIG[k], savedConfig[k]); }); }
-function saveEdifConfig(){ try{ localStorage.setItem('vcb_edif_config', JSON.stringify(Object.fromEntries(Object.entries(EDIFICIOS_CONFIG).map(([k,v])=>[k,{activoVentas:v.activoVentas,activoWL:v.activoWL}])))); }catch(e){} }
-const EDIFICIOS = Object.keys(EDIFICIOS_CONFIG).filter(k => EDIFICIOS_CONFIG[k].activoVentas);
-const PISOS_VTA         = [7,6,5,4,3,2];
+(function(){ const s=JSON.parse(localStorage.getItem('vcb_ecfg')||'null'); if(s) Object.keys(s).forEach(k=>{ if(EDIFICIOS_CONFIG[k]) Object.assign(EDIFICIOS_CONFIG[k],s[k]); }); })();
+function saveECfg(){ try{ localStorage.setItem('vcb_ecfg',JSON.stringify(Object.fromEntries(Object.entries(EDIFICIOS_CONFIG).map(([k,v])=>[k,{vta:v.vta,wl:v.wl}])))); }catch(e){} }
+const EDIFICIOS = Object.keys(EDIFICIOS_CONFIG).filter(k=>EDIFICIOS_CONFIG[k].vta);
+const PISOS_VTA = [8,7,6,5,4,3,2,1];
 const WL_PISOS          = [8,7,6,5,4,3,2];
 
 /* ═══════════ CATÁLOGO CONSTRUCTORA ═══════════ */
@@ -562,7 +575,7 @@ if (!ventas) {
 }
 
 let wl = JSON.parse(localStorage.getItem('vcb_wl_cv') || '[]');
-let curWLEdif = Object.keys(EDIFICIOS_CONFIG).find(k=>EDIFICIOS_CONFIG[k].activoWL) || 'D';
+let curWLEdif = Object.keys(EDIFICIOS_CONFIG).find(k=>EDIFICIOS_CONFIG[k].wl)||'D';
 let curEdif = 'B';
 let adminOn = false, coordOn = false;
 let docFile = null, activeUnit = null, activeWLUnit = null;
@@ -612,11 +625,22 @@ function renderKPIs(){
 
 /* ─── EDIF TABS ─── */
 function renderETabs(){
-  const active = Object.keys(EDIFICIOS_CONFIG).filter(k=>EDIFICIOS_CONFIG[k].activoVentas);
-  if(!active.includes(curEdif)) curEdif = active[0] || 'B';
-  document.getElementById('etabs').innerHTML = active.map(e=>
-    `<button class="etab${e===curEdif?' on':''}" onclick="curEdif='${e}';renderETabs();renderFloors()">${EDIFICIOS_CONFIG[e].nombre}</button>`
-  ).join('') || '<p style="font-size:12px;color:var(--warm)">No hay edificios activos. Accede como Admin para activarlos.</p>';
+  const active=Object.keys(EDIFICIOS_CONFIG).filter(k=>EDIFICIOS_CONFIG[k].vta);
+  if(!active.includes(curEdif)) curEdif=active[0]||'B';
+  var el=document.getElementById('etabs');
+  if(!el) return;
+  if(!active.length){
+    el.innerHTML='<p style="font-size:12px;color:var(--warm)">Sin edificios activos. Entra como Admin para activar.</p>';
+    return;
+  }
+  el.innerHTML='';
+  active.forEach(function(e){
+    const btn=document.createElement('button');
+    btn.className='etab'+(e===curEdif?' on':'');
+    btn.textContent=EDIFICIOS_CONFIG[e].nombre;
+    btn.onclick=function(){ curEdif=e; renderETabs(); renderFloors(); };
+    el.appendChild(btn);
+  });
 }
 
 /* ─── FLOORS ─── */
@@ -624,11 +648,11 @@ function renderFloors(){
   checkVencidos();
   const wrap=document.getElementById('floors'); wrap.innerHTML='';
   PISOS_VTA.forEach(piso=>{
-    const units=Object.keys(CATALOG).filter(k=>k[0]===curEdif&&CATALOG[k].piso===piso).sort(); if(!EDIFICIOS_CONFIG[curEdif]?.activoVentas) return;
+    const units=Object.keys(CATALOG).filter(k=>k[0]===curEdif&&CATALOG[k].piso===piso).sort();
     if(!units.length) return;
     const occ=units.filter(u=>{ const v=gV(u); return v&&v.estado!=='disponible'; }).length;
     const div=document.createElement('div'); div.className='fl-block';
-    div.innerHTML=`<div class="fl-hd"><span class="fl-lbl">Piso ${piso}${piso===2?' — Patio':piso===7?' — Terraza':''}</span><span class="fl-div"></span><span class="fl-cnt">${occ}/${units.length} ocupadas</span></div><div class="ugrid" id="ug-${piso}"></div>`;
+    div.innerHTML=`<div class="fl-hd"><span class="fl-lbl">Piso ${piso}${piso===1?' — Patio':piso===8?' — Terraza':''}</span><span class="fl-div"></span><span class="fl-cnt">${occ}/${units.length} ocupadas</span></div><div class="ugrid" id="ug-${piso}"></div>`;
     wrap.appendChild(div);
     const grid=document.getElementById(`ug-${piso}`);
     units.forEach(code=>{
@@ -716,14 +740,18 @@ function openM(code, cat, venta){
     </div>`;
   }
 
+  const showProc = venta && ['bloqueado','reservado','vencido','vendido'].includes(st);
+  const procHTML = showProc ? '<div id="proc-section">'+buildProcHTML(code)+'</div>' : '';
   document.getElementById('m-body').innerHTML=`
     <div class="sban ${sb.cls}"><svg viewBox="0 0 24 24">${sb.ico}</svg><span>${sb.txt}</span></div>
-    <div class="upills">
+    <div class="upills" style="grid-template-columns:repeat(4,1fr)">
       <div class="up"><span class="up-v">${cat.caract.split('·')[0].trim()}</span><span class="up-k">Habitaciones</span></div>
-      <div class="up"><span class="up-v">${cat.m2} m²${cat.piso===2?' + Patio':cat.piso===7?' + Terraza':''}</span><span class="up-k">Área</span></div>
+      <div class="up"><span class="up-v">${cat.m2} m²${cat.piso===1?' + Patio':cat.piso===8?' + Terraza':''}</span><span class="up-k">Área</span></div>
       <div class="up"><span class="up-v" style="${cat.vista==='Piscina'?'color:var(--blue)':'color:var(--green)'}">${cat.vista}</span><span class="up-k">Vista</span></div>
+      <div class="up"><span class="up-v" style="color:var(--green-d)">$${cat.precio.toLocaleString()}</span><span class="up-k">Precio USD</span></div>
     </div>
     ${cinfo}
+    ${procHTML}
     <div id="m-act">${btns}</div>`;
 
   document.getElementById('ov').classList.add('open');
@@ -980,8 +1008,11 @@ function renderTable(){
     <td style="font-size:11px">${v.asesor||'—'}</td>
     <td style="font-size:11px">${v.precio?'$'+v.precio.toLocaleString():'—'}</td>
     <td>${stPill(v.estado)}</td>
-    <td style="text-align:center">${v.docCedula?`<span title="${v.docCedula}" style="color:var(--green);font-size:13px">🪪</span>`:'—'}</td>
-    <td style="text-align:center">${v.docComp?`<span title="${v.docComp}" style="color:var(--blue);font-size:13px">💳</span>`:'—'}</td>
+    <td style="text-align:center">${v.docCedula?`<span title="${v.docCedula}" style="color:var(--green)">🪪</span>`:'—'}</td>
+    <td style="text-align:center">${v.docComp?`<span title="${v.docComp}" style="color:var(--blue)">💳</span>`:'—'}</td>
+    <td style="text-align:center;font-size:13px">${v.proceso&&v.proceso.dd?'<span style="color:var(--green)">✓</span>':'—'}</td>
+    <td style="text-align:center;font-size:13px">${v.proceso&&v.proceso.coc?'<span style="color:var(--green)">✓</span>':'—'}</td>
+    <td style="text-align:center;font-size:13px">${v.proceso&&v.proceso.p10?'<span style="color:var(--green)">✓</span>':'—'}</td>
     <td style="font-size:10px;color:var(--warm);white-space:nowrap">${v.fecha?new Date(v.fecha).toLocaleDateString('es-DO'):'—'}</td>
     <td style="font-size:10px;color:${v.nota?.includes('⚠️')?'var(--amber)':'var(--warm)'}">${v.nota||'—'}</td>
   </tr>`).join('');
@@ -995,12 +1026,75 @@ const WL_SLOTS=[
   {n:'07',m2:115,tipo:'3 Hab',vista:'Piscina'},{n:'08',m2:85,tipo:'2 Hab',vista:'Jardín'},
 ];
 
+/* ─── PROCESO DE CIERRE ─── */
+const PROC_STEPS = [
+  {id:'dd',  label:'Debida diligencia'},
+  {id:'coc', label:'Contrato de opción a compra'},
+  {id:'p10', label:'Pago del 10%'},
+];
+
+function getProc(code){
+  const v=gV(code);
+  if(!v) return {};
+  if(!v.proceso) v.proceso={dd:false,coc:false,p10:false,dd_f:'',coc_f:'',p10_f:''};
+  return v.proceso;
+}
+
+function toggleProc(el){
+  const code=el.dataset.code, stepId=el.dataset.step;
+  const v=gV(code);
+  if(!v) return;
+  if(!v.proceso) v.proceso={dd:false,coc:false,p10:false,dd_f:'',coc_f:'',p10_f:''};
+  v.proceso[stepId] = !v.proceso[stepId];
+  v.proceso[stepId+'_f'] = v.proceso[stepId] ? new Date().toLocaleDateString('es-DO') : '';
+  saveV();
+  var procSec=document.getElementById('proc-section');
+  if(procSec) procSec.innerHTML=buildProcHTML(code);
+}
+
+function buildProcHTML(code){
+  const p=getProc(code);
+  const done=PROC_STEPS.filter(s=>p[s.id]).length;
+  const pct=Math.round((done/PROC_STEPS.length)*100);
+  const barColor=pct===100?'var(--green)':'var(--amber)';
+  const cntColor=pct===100?'var(--green-d)':'var(--warm)';
+  let html='<div class="proc-wrap">';
+  html+='<div class="proc-title">✅ Proceso de cierre';
+  html+='<span style="margin-left:auto;color:'+cntColor+'">'+done+'/'+PROC_STEPS.length+'</span></div>';
+  html+='<div class="proc-bar-wrap"><div class="proc-bar" style="width:'+pct+'%;background:'+barColor+'"></div></div>';
+  html+='<div class="proc-steps">';
+  PROC_STEPS.forEach(function(s,i){
+    const isDone=p[s.id]?true:false;
+    const fecha=p[s.id+'_f']||'';
+    html+='<div class="ps'+(isDone?' done':'')+'" onclick="toggleProc(this)"  data-code="'+code+'" data-step="'+s.id+'">';
+    html+='<div class="ps-num">'+(isDone?'✓':(i+1))+'</div>';
+    html+='<span class="ps-lbl">'+s.label+'</span>';
+    if(fecha) html+='<span class="ps-date">'+fecha+'</span>';
+    html+='<span class="ps-ico">✓</span>';
+    html+='</div>';
+  });
+  html+='</div></div>';
+  return html;
+}
+
 function renderWLFloors(){
-  // Render WL edificio tabs
-  const activeWL = Object.keys(EDIFICIOS_CONFIG).filter(k=>EDIFICIOS_CONFIG[k].activoWL);
-  if(!activeWL.includes(curWLEdif)) curWLEdif = activeWL[0] || 'D';
-  const wlTabsEl = document.getElementById('wl-edif-tabs');
-  if(wlTabsEl){ wlTabsEl.innerHTML = activeWL.length ? activeWL.map(e=>`<button class="etab${e===curWLEdif?' on':''}" onclick="curWLEdif='${e}';renderWLFloors()">${EDIFICIOS_CONFIG[e].nombre}</button>`).join('') : '<p style="font-size:12px;color:var(--warm)">No hay edificios activos para lista de espera.</p>'; }
+  const activeWL=Object.keys(EDIFICIOS_CONFIG).filter(k=>EDIFICIOS_CONFIG[k].wl);
+  if(!activeWL.includes(curWLEdif)) curWLEdif=activeWL[0]||'D';
+  var wlTabEl=document.getElementById('wl-edif-tabs');
+  if(wlTabEl){
+    if(!activeWL.length){
+      wlTabEl.innerHTML='<p style="font-size:12px;color:var(--warm)">Sin edificios activos para WL.</p>';
+    } else {
+      wlTabEl.innerHTML='';
+      activeWL.forEach(function(e){
+        var btn=document.createElement('button');
+        btn.className='etab'+(e===curWLEdif?' on':'');
+        btn.textContent=EDIFICIOS_CONFIG[e].nombre;
+        btn.onclick=function(){ curWLEdif=e; renderWLFloors(); };
+        wlTabEl.appendChild(btn);
+      });
+    }
+  }
   if(!activeWL.length){ document.getElementById('wl-floors').innerHTML=''; return; }
   const wrap=document.getElementById('wl-floors'); wrap.innerHTML='';
   WL_PISOS.forEach(piso=>{
@@ -1010,7 +1104,7 @@ function renderWLFloors(){
     wrap.appendChild(div);
     const grid=document.getElementById(`wlu-${piso}`);
     WL_SLOTS.forEach(s=>{
-      const code=`${curWLEdif}${piso}0${s.n}`;
+      const code=curWLEdif+piso+'0'+s.n;
       const cnt=wlCount(code); const full=cnt>=WL_MAX;
       let cls='wluc'; if(full) cls+=' wl-full'; else if(cnt===2) cls+=' wl-has2'; else if(cnt===1) cls+=' wl-has1';
       const dots=Array.from({length:WL_MAX},(_,i)=>`<div class="wldot${i<cnt?' d'+cnt:''}"></div>`).join('');
@@ -1039,7 +1133,7 @@ function openWL(code, slot, piso){
     document.getElementById('wl-m-body').innerHTML=`
       <div class="upills">
         <div class="up"><span class="up-v">${slot.tipo}</span><span class="up-k">Habitaciones</span></div>
-        <div class="up"><span class="up-v">${slot.m2} m²${piso===2?' + Patio':piso===8?' + Terraza':''}</span><span class="up-k">Área</span></div>
+        <div class="up"><span class="up-v">${slot.m2} m²${piso===1?' + Patio':piso===8?' + Terraza':''}</span><span class="up-k">Área</span></div>
         <div class="up"><span class="up-v" style="${slot.vista==='Piscina'?'color:var(--blue)':'color:var(--green)'}">${slot.vista}</span><span class="up-k">Vista</span></div>
       </div>
       <div class="wbar"><div class="wbar-d">${dots}</div><span class="wbar-t">${cnt} de ${WL_MAX} — quedan <strong>${WL_MAX-cnt}</strong></span></div>
@@ -1131,58 +1225,67 @@ function goTab(t){
 
 /* ─── AUTH ─── */
 function toggleAdmin(){
-  if(adminOn){ adminOn=false; document.getElementById('admin-btn').classList.remove('on'); document.getElementById('admin-btn').innerHTML='<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Admin'; closeAdminPanel(); renderFloors(); return; }
+  if(adminOn){
+    adminOn=false;
+    document.getElementById('admin-btn').classList.remove('on');
+    document.getElementById('admin-btn').textContent='Admin';
+    const p=document.getElementById('admin-panel'); if(p) p.remove();
+    renderFloors(); return;
+  }
   const pw=prompt('Contraseña administrador:');
-  if(pw===ADMIN_PASS){ adminOn=true; document.getElementById('admin-btn').classList.add('on'); document.getElementById('admin-btn').innerHTML='<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Admin ✓'; showAdminPanel(); }
-  else if(pw!==null) alert('Contraseña incorrecta');
+  if(pw!==ADMIN_PASS){ if(pw!==null) alert('Contraseña incorrecta'); return; }
+  adminOn=true;
+  document.getElementById('admin-btn').classList.add('on');
+  document.getElementById('admin-btn').textContent='Admin ✓';
+  // Insert admin panel
+  const panel=document.createElement('div');
+  panel.id='admin-panel';
+  panel.style.cssText='background:#fff;border:2px solid var(--amber);border-radius:var(--rlg);padding:1.1rem 1.25rem;margin-bottom:1.25rem';
+  panel.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:.9rem;padding-bottom:.75rem;border-bottom:1px solid var(--stone)">'
+    +'<span style="font-size:13px;font-weight:600;color:var(--ink)">⚙️ Panel Admin — Gestión de Edificios</span>'
+    +'<button onclick="toggleAdmin()" style="margin-left:auto;padding:3px 10px;background:var(--stone);border:none;border-radius:6px;cursor:pointer;font-size:11px;font-family:sans-serif">Cerrar</button>'
+    +'</div><div id="ecfg-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px"></div>';
+  const tabsEl=document.querySelector('.tabs');
+  tabsEl.parentNode.insertBefore(panel, tabsEl);
+  renderECfgGrid();
 }
 
-function showAdminPanel(){
-  // Inject admin panel above tabs if not exists
-  if(document.getElementById('admin-panel')) return;
-  const panel = document.createElement('div');
-  panel.id = 'admin-panel';
-  panel.style.cssText = 'background:#fff;border:2px solid var(--amber);border-radius:var(--rlg);padding:1.25rem;margin-bottom:1.5rem';
-  panel.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--stone)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      <span style="font-size:13px;font-weight:600">Panel Administrador — Gestión de Edificios</span>
-      <button onclick="closeAdminPanel()" style="margin-left:auto;padding:4px 10px;background:var(--stone);border:none;border-radius:6px;cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--warm)">Cerrar</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px" id="edif-admin-grid"></div>`;
-  const main = document.querySelector('.tabs');
-  main.parentNode.insertBefore(panel, main);
-  renderEdifAdminGrid();
+function renderECfgGrid(){
+  var grid=document.getElementById('ecfg-grid'); if(!grid) return;
+  grid.innerHTML='';
+  Object.entries(EDIFICIOS_CONFIG).forEach(function(entry){
+    var id=entry[0], e=entry[1];
+    var active=e.vta||e.wl;
+    var card=document.createElement('div');
+    card.style.cssText='border:1.5px solid '+(active?'var(--lime-d)':'var(--stone)')+';border-radius:var(--r);padding:8px 11px;background:'+(active?'var(--green-l)':'var(--cream)');
+    var nameDiv=document.createElement('div');
+    nameDiv.style.cssText='font-size:12px;font-weight:600;margin-bottom:6px';
+    nameDiv.textContent=e.nombre;
+    card.appendChild(nameDiv);
+    // Ventas toggle
+    var lv=document.createElement('label');
+    lv.style.cssText='display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--warm);margin-bottom:4px';
+    lv.textContent='Control Ventas';
+    var iv=document.createElement('input');
+    iv.type='checkbox'; iv.checked=e.vta; iv.style.cssText='accent-color:var(--green);cursor:pointer;width:14px;height:14px';
+    iv.onchange=function(){ toggleEdif(id,'vta',this.checked); };
+    lv.appendChild(iv); card.appendChild(lv);
+    // WL toggle
+    var lw=document.createElement('label');
+    lw.style.cssText='display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--warm)';
+    lw.textContent='Waiting List';
+    var iw=document.createElement('input');
+    iw.type='checkbox'; iw.checked=e.wl; iw.style.cssText='accent-color:var(--blue);cursor:pointer;width:14px;height:14px';
+    iw.onchange=function(){ toggleEdif(id,'wl',this.checked); };
+    lw.appendChild(iw); card.appendChild(lw);
+    grid.appendChild(card);
+  });
 }
 
-function closeAdminPanel(){
-  const p = document.getElementById('admin-panel');
-  if(p) p.remove();
-}
-
-function renderEdifAdminGrid(){
-  const grid = document.getElementById('edif-admin-grid');
-  if(!grid) return;
-  grid.innerHTML = Object.entries(EDIFICIOS_CONFIG).map(([id,e])=>`
-    <div style="border:1.5px solid ${e.activoVentas||e.activoWL?'var(--lime-d)':'var(--stone)'};border-radius:var(--r);padding:9px 12px;background:${e.activoVentas||e.activoWL?'var(--green-l)':'var(--cream)'}">
-      <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px">${e.nombre}</div>
-      <div style="display:flex;flex-direction:column;gap:5px">
-        <label style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--warm)">
-          Ventas/Control
-          <input type="checkbox" ${e.activoVentas?'checked':''} onchange="toggleEdif('${id}','activoVentas',this.checked)" style="width:14px;height:14px;accent-color:var(--green);cursor:pointer">
-        </label>
-        <label style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--warm)">
-          Waiting List
-          <input type="checkbox" ${e.activoWL?'checked':''} onchange="toggleEdif('${id}','activoWL',this.checked)" style="width:14px;height:14px;accent-color:var(--blue);cursor:pointer">
-        </label>
-      </div>
-    </div>`).join('');
-}
-
-function toggleEdif(id, prop, val){
-  EDIFICIOS_CONFIG[id][prop] = val;
-  saveEdifConfig();
-  renderEdifAdminGrid();
+function toggleEdif(id,prop,val){
+  EDIFICIOS_CONFIG[id][prop]=val;
+  saveECfg();
+  renderECfgGrid();
   renderETabs();
   renderFloors();
   renderWLFloors();
