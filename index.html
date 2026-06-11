@@ -743,8 +743,14 @@ const SEED = [
 ];
 
 /* ═══════════ STATE ═══════════ */
-let ventas = JSON.parse(localStorage.getItem('vcb_cv_v11') || 'null');
+let ventas = JSON.parse(localStorage.getItem('vcb_cv_v12') || 'null');
 if (!ventas) {
+  // Load saved bloqueo timestamps so timers persist across page reloads
+  const savedTs = {};
+  try {
+    const tsData = JSON.parse(localStorage.getItem('vcb_ts_v1') || '{}');
+    Object.assign(savedTs, tsData);
+  } catch(e) {}
   ventas = SEED.map((s,i) => ({
     id: s.id||8000+i,
     edificio: s.edificio || s.u?.[0] || '',
@@ -760,7 +766,11 @@ if (!ventas) {
     fecha: s.fecha || new Date().toISOString(),
     nota: s.nota||'', cedula: s.cedula||'',
     docCedula: s.docCedula||'', docComp: s.docComp||'',
-    bloqueo_ts: (s.estado||s.st)==='bloqueado' ? Date.now() : null
+    bloqueo_ts: (s.estado||s.st)==='bloqueado' ? (() => {
+      // Use saved ts from localStorage if exists, otherwise set ~6h ago as default
+      const saved = savedTs[s.unidad||s.u||''];
+      return saved || (Date.now() - 6*3600000);
+    })() : null
   }));
   saveV();
 }
@@ -772,7 +782,7 @@ let adminOn = false, coordOn = false;
 let docFile = null, activeUnit = null, activeWLUnit = null;
 let timerIv = null;
 
-function saveV(){ try{ localStorage.setItem('vcb_cv_v11', JSON.stringify(ventas)); }catch(e){} }
+function saveV(){ try{ localStorage.setItem('vcb_cv_v12', JSON.stringify(ventas)); }catch(e){} }
 function saveWL(){ try{ localStorage.setItem('vcb_wl_cv', JSON.stringify(wl)); }catch(e){} }
 function gV(code){ return ventas.find(v=>v.unidad===code); }
 function wlCount(code){ return wl.filter(r=>r.unidad===code).length; }
@@ -991,9 +1001,12 @@ function showBloqForm(){
       <p id="b-upt">Adjuntar cédula o pasaporte · PDF JPG PNG</p>
     </div>
     <div class="frow fw"><div class="fg"><label>Notas</label><textarea id="bno" placeholder="Condiciones..."></textarea></div></div>
-    <div style="background:var(--amber-l);border-radius:var(--r);padding:8px 11px;font-size:11px;color:#854f0b;margin-bottom:10px;display:flex;align-items:center;gap:6px">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Bloqueo por <strong>12 horas</strong>. La cédula se guarda en Drive automáticamente.
+    <div style="background:var(--amber-l);border:1px solid #f5c977;border-radius:var(--r);padding:10px 13px;font-size:11px;color:#854f0b;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:6px;font-weight:600;margin-bottom:5px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Aviso importante — Bloqueo por 12 horas
+      </div>
+      <p style="line-height:1.6;color:#6b4c0a">Este registro <strong>no garantiza</strong> que la unidad haya sido formalmente bloqueada. Para confirmar la operación, es indispensable enviar el <strong>comprobante de pago</strong> y el <strong>documento de identidad</strong> a las personas encargadas de certificar y formalizar dicha transacción. Sin estos documentos, la unidad podrá ser liberada una vez transcurridas las 12 horas.</p>
     </div>
     <div class="abtns">
       <button class="abtn btn-blq" onclick="confirmarBloq('${code}')"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Confirmar bloqueo</button>
@@ -1033,11 +1046,20 @@ async function confirmarBloq(code){
 
   if(existing) Object.assign(existing,rec); else ventas.push(rec);
   saveV();
+  // Save ts separately so it persists even if SEED reloads
+  try {
+    const tsData = JSON.parse(localStorage.getItem('vcb_ts_v1') || '{}');
+    tsData[rec.unidad] = rec.bloqueo_ts;
+    localStorage.setItem('vcb_ts_v1', JSON.stringify(tsData));
+  } catch(e) {}
 
   document.getElementById('m-body').innerHTML=`<div class="mok">
     <div class="oico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-    <h3>¡Unidad bloqueada!</h3>
-    <p><strong>${nombre}</strong><br>Cédula guardada en Drive · 24 horas para comprobante</p>
+    <h3>¡Registro exitoso!</h3>
+    <p><strong>${nombre}</strong> · <strong>${code}</strong></p>
+    <div style="background:#fef9e7;border:1px solid #f5c977;border-radius:8px;padding:9px 12px;font-size:11px;color:#6b4c0a;line-height:1.6;text-align:left;margin-top:10px">
+      ⚠️ <strong>Recuerda:</strong> este registro no garantiza el bloqueo formal de la unidad. Para certificar la operación, envía el <strong>comprobante de pago</strong> y el <strong>documento de identidad</strong> a las personas autorizadas dentro de las próximas <strong>12 horas</strong>.
+    </div>
     <button class="ok-btn" onclick="closeM();renderFloors();renderKPIs()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Ver mapa</button>
   </div>`;
   renderKPIs();
@@ -1162,7 +1184,9 @@ async function aprobarRes(code){
 }
 
 /* ─── ACTIONS ─── */
-function liberarU(code){ if(!confirm(`¿Liberar ${code}?`)) return; const idx=ventas.findIndex(v=>v.unidad===code); if(idx>=0) ventas.splice(idx,1); saveV(); closeM(); renderFloors(); renderKPIs(); }
+function liberarU(code){ if(!confirm(`¿Liberar ${code}?`)) return; const idx=ventas.findIndex(v=>v.unidad===code); if(idx>=0) ventas.splice(idx,1); saveV();
+  try { const tsData=JSON.parse(localStorage.getItem('vcb_ts_v1')||'{}'); delete tsData[code]; localStorage.setItem('vcb_ts_v1',JSON.stringify(tsData)); } catch(e) {}
+  closeM(); renderFloors(); renderKPIs(); }
 function cambiarSt(code,st){ const v=gV(code); if(!v) return; v.estado=st; if(st==='vendido') delete v.bloqueo_ts; saveV(); closeM(); renderFloors(); renderKPIs(); }
 
 /* ─── COORD PANEL ─── */
