@@ -404,6 +404,7 @@ tr:hover td{background:#fafaf7}
 <script>
 /* ═══════════ CONFIG ═══════════ */
 const SCRIPT_URL        = 'https://script.google.com/macros/s/AKfycbziFLez79GXM5BcRb0EGN_hOf4D-_qm6_EFqkhqsNILtA_cHt25Lu8CJdCq9caBYd3Z/exec';
+const PROXY_URL         = 'https://script.google.com/macros/s/AKfycbyEJYyhVwXj9O147vG8Aj1LJZU0aJSdToQ0vnvW5CrErgXejO8ZUzehh2PL7tNm3MI-/exec';
 const FOLDER_CEDULAS    = '13CWabEbAkHZh7Sl2ppuJptDrJTUTPZOA';
 const FOLDER_COMP       = '1B4wAeJfwrwazQ8s2PP6yUKtsRDW9ipTl';
 const SHEET_VENTAS      = '1tpr9HcPsiIy48KJKecC0nVTfxp_h1YITIA-_hUaCBYA';
@@ -633,7 +634,7 @@ const SEED = [
   {id:9042,edificio:'B',unidad:'B703',piso:7,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:173411,cliente:"Rosario Santo",asesor:"Ivan Guerrero",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9043,edificio:'B',unidad:'B704',piso:7,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:115606,cliente:"Carlos Bautista",asesor:"Edwin",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9044,edificio:'B',unidad:'B705',piso:7,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:173411,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9045,edificio:'B',unidad:'B706',piso:7,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:162901,cliente:"Evelyn Martinez Jimenez",asesor:"Starlyn Zapata",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
+  {id:9045,edificio:'B',unidad:'B706',piso:7,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:162901,cliente:"Evelyn Martinez Jimenez",asesor:"Starlyn Zapata",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9046,edificio:'B',unidad:'B707',piso:7,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:220707,cliente:"Ruben Neftali Jimenez",asesor:"Rafael Rodriguez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9047,edificio:'B',unidad:'B708',piso:7,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:162901,cliente:"Duverge y Asociados",asesor:"Lis Gonzalez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9048,edificio:'C',unidad:'C201',piso:2,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:220495,cliente:"Joel Martinez",asesor:"Jael Hernandez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
@@ -735,7 +736,7 @@ const SEED = [
 ];
 
 /* ═══════════ STATE ═══════════ */
-let ventas = JSON.parse(localStorage.getItem('vcb_cv_v6') || 'null');
+let ventas = JSON.parse(localStorage.getItem('vcb_cv_v7') || 'null');
 if (!ventas) {
   ventas = SEED.map((s,i) => ({
     id: s.id||8000+i,
@@ -764,7 +765,7 @@ let adminOn = false, coordOn = false;
 let docFile = null, activeUnit = null, activeWLUnit = null;
 let timerIv = null;
 
-function saveV(){ try{ localStorage.setItem('vcb_cv_v6', JSON.stringify(ventas)); }catch(e){} }
+function saveV(){ try{ localStorage.setItem('vcb_cv_v7', JSON.stringify(ventas)); }catch(e){} }
 function saveWL(){ try{ localStorage.setItem('vcb_wl_cv', JSON.stringify(wl)); }catch(e){} }
 function gV(code){ return ventas.find(v=>v.unidad===code); }
 function wlCount(code){ return wl.filter(r=>r.unidad===code).length; }
@@ -1486,7 +1487,71 @@ function toggleCoord(){
 renderKPIs();
 renderETabs();
 renderFloors();
+
+/* ── SINCRONIZACIÓN EN VIVO CON CONSTRUCTORA ── */
+function syncConstructora() {
+  const ind = document.getElementById('sync-indicator');
+  if(ind){ ind.textContent = '🔄 Sincronizando...'; ind.style.color='var(--amber)'; }
+  
+  fetch(PROXY_URL)
+    .then(r => r.json())
+    .then(data => {
+      if(data.error){ 
+        if(ind){ ind.textContent = '⚠️ Sin datos en vivo'; ind.style.color='var(--amber)'; }
+        return; 
+      }
+      
+      // data should be array of units: [{identificador, nivel, m2, vista, caracteristicas, precio, estatus}]
+      const units = Array.isArray(data) ? data : (data.unidades || data.units || data.data || []);
+      if(!units.length){ 
+        if(ind){ ind.textContent = '📋 Datos locales'; ind.style.color='var(--warm)'; }
+        return; 
+      }
+      
+      let updated = 0;
+      units.forEach(u => {
+        const code = (u.identificador || u.unidad || u.unit || '').toString().trim().replace(/[^A-Z0-9]/gi,'').toUpperCase();
+        if(!code || !CATALOG[code]) return;
+        const estatus = (u.estatus || u.status || u.estado || '').toLowerCase();
+        const esDisp = estatus.includes('disp') || estatus === 'available';
+        const esRes  = estatus.includes('res')  || estatus === 'reserved';
+        
+        // Update CATALOG ec (estado constructora)
+        CATALOG[code].ec = esDisp ? 'Disponible' : 'Reservado';
+        
+        // If constructora says Disponible but we have it reserved → flag conflict
+        const v = gV(code);
+        if(esDisp && v && ['reservado','bloqueado'].includes(v.estado)){
+          if(!v.nota.includes('Constructora: Disponible')){
+            v.nota = (v.nota ? v.nota + ' | ' : '') + '⚠️ Constructora: Disponible';
+          }
+        }
+        
+        // If constructora says Reservado but we don't have it → mark sin asesor
+        if(esRes && !v){
+          // Already handled in initial SEED, just refresh
+        }
+        updated++;
+      });
+      
+      if(ind){ 
+        const now = new Date().toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit'});
+        ind.textContent = '✅ Actualizado ' + now + ' (' + units.length + ' uds)'; 
+        ind.style.color='var(--green)'; 
+      }
+      
+      if(updated > 0){ renderFloors(); renderKPIs(); }
+    })
+    .catch(err => {
+      console.warn('Proxy sync error:', err.message);
+      if(ind){ ind.textContent = '📋 Modo offline'; ind.style.color='var(--warm)'; }
+    });
+}
+
+// Sync on load + every 30 minutes
+setTimeout(syncConstructora, 2000);
+setInterval(syncConstructora, 30 * 60 * 1000);
 setInterval(()=>{ checkVencidos(); renderKPIs(); if(document.getElementById('p-coord').classList.contains('on')) renderCoord(); },60000);
 </script>
 </body>
-</html>
+</html><span id="sync-indicator" style="font-size:10px;color:rgba(255,255,255,.5);margin-right:8px">📋 Cargando...</span>
