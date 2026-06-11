@@ -42,6 +42,7 @@ h1.pg{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;mar
 .kpi.total::before{background:var(--ink)}.kpi.vendido::before{background:var(--green)}
 .kpi.reservado::before{background:var(--blue)}.kpi.bloqueado::before{background:var(--amber)}
 .kpi.vencido::before{background:var(--red)}.kpi.disponible::before{background:var(--stone)}
+.kpi.constructora::before{background:#9ca3af}
 .kpi-n{font-size:22px;font-weight:600;font-family:'DM Serif Display',serif}
 .kpi-l{font-size:10px;color:var(--warm);margin-top:1px}
 
@@ -80,6 +81,11 @@ h1.pg{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;mar
 .uc.reservado{background:var(--blue-l);border-color:var(--blue)}
 .uc.vendido{background:var(--green-l);border-color:var(--green)}
 .uc.vencido{background:var(--red-l);border-color:var(--red);animation:pr 2s infinite}
+.uc.constructora{background:#f0f0f0;border-color:#9ca3af;cursor:default}
+.uc.constructora:hover{transform:none;box-shadow:none}
+.uc.constructora .uc-code{color:#4b5563}
+.uc.constructora .uc-st{color:#6b7280}
+.uc.constructora .uc-name{color:#9ca3af}
 @keyframes pr{0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0)}50%{box-shadow:0 0 0 4px rgba(226,75,74,.2)}}
 .uc-code{font-size:10px;font-weight:600;color:var(--ink);display:block;margin-bottom:1px}
 .uc-name{font-size:9px;color:var(--warm);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
@@ -220,7 +226,7 @@ tr:hover td{background:#fafaf7}
 .pill{display:inline-block;font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px}
 .pg{background:var(--green-l);color:var(--green-d)}.pa{background:var(--amber-l);color:#854f0b}
 .pb{background:var(--blue-l);color:var(--blue)}.pr{background:var(--red-l);color:#a32d2d}
-.pk{background:var(--stone);color:var(--warm)}.pp{background:var(--purple-l);color:var(--purple)}
+.pk{background:var(--stone);color:var(--warm)}.pp{background:var(--purple-l);color:var(--purple)}.pc{background:#f3f4f6;color:#4b5563}
 .empty-s{text-align:center;padding:2.5rem;color:var(--warm)}
 .empty-s svg{width:30px;height:30px;stroke:var(--stone);fill:none;stroke-width:1.5;display:block;margin:0 auto 8px}
 
@@ -332,6 +338,7 @@ tr:hover td{background:#fafaf7}
       <div class="li"><div class="lsq" style="background:#e6f1fb;border:1.5px solid #185fa5"></div>Reservada</div>
       <div class="li"><div class="lsq" style="background:#eaf3de;border:1.5px solid #3b6d11"></div>Vendida</div>
       <div class="li"><div class="lsq" style="background:#fcebeb;border:1.5px solid #e24b4a"></div>Vencida ⚠️</div>
+      <div class="li"><div class="lsq" style="background:#f0f0f0;border:1.5px solid #9ca3af"></div>Reservada constructora</div>
     </div>
     <div id="floors"></div>
   </div>
@@ -411,7 +418,7 @@ const SHEET_VENTAS      = '1tpr9HcPsiIy48KJKecC0nVTfxp_h1YITIA-_hUaCBYA';
 const DRIVE_ROOT        = 'https://drive.google.com/drive/folders/1jASHaWkmABR55_pPeVroPN6OOzRiMY11';
 const ADMIN_PASS        = 'plusval2025';
 const COORD_PASS        = 'coord2025';
-const BLOQUEO_H         = 24;
+const BLOQUEO_H         = 12;
 const WL_MAX            = 3;
 const EDIFICIOS_CONFIG = {
   'A':{nombre:'Edificio A',vta:false,wl:false},
@@ -514,7 +521,7 @@ const CATALOG = {};
   ["C407",4,115,"Piscina","3 Hab · 2.5 Baños",224927,"Reservado"],
   ["C408",4,85,"Jardín","2 Hab · 2 Baños",166016,"Disponible"],
   ["C501",5,115,"Piscina","3 Hab · 2.5 Baños",227176,"Reservado"],
-  ["C502",5,85,"Jardín","2 Hab · 2 Baños",167676,"Reservado"],
+  ["C502",5,85,"Jardín","2 Hab · 2 Baños",162745,"Reservado"],
   ["C503",5,85,"Piscina","2 Hab · 2 Baños",178494,"Reservado"],
   ["C504",5,55,"Jardín","1 Hab · 1 Baño",118994,"Reservado"],
   ["C505",5,85,"Piscina","2 Hab · 2 Baños",178494,"Reservado"],
@@ -589,7 +596,7 @@ const CATALOG = {};
 
 /* ═══════════ VENTAS SEED ═══════════ */
 const SEED = [
-  {id:9000,edificio:'B',unidad:'B201',piso:2,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:209995,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9000,edificio:'B',unidad:'B201',piso:2,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:209995,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9001,edificio:'B',unidad:'B202',piso:2,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:154995,cliente:"Omar Garcia",asesor:"Raquel Veliz",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9002,edificio:'B',unidad:'B203',piso:2,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:164995,cliente:"Emil",asesor:"Starlyn",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9003,edificio:'B',unidad:'B204',piso:2,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:109995,cliente:"Ines Paez",asesor:"Alejandro Paez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
@@ -598,7 +605,7 @@ const SEED = [
   {id:9006,edificio:'B',unidad:'B207',piso:2,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:209995,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9007,edificio:'B',unidad:'B208',piso:2,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:154995,cliente:"Bernalda Reyes",asesor:"Lis Gonzalez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9008,edificio:'B',unidad:'B301',piso:3,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:212095,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9009,edificio:'B',unidad:'B302',piso:3,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:156545,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9009,edificio:'B',unidad:'B302',piso:3,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:156545,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9010,edificio:'B',unidad:'B303',piso:3,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:166645,cliente:"Serge Alexis",asesor:"Jaqueline Paez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9011,edificio:'B',unidad:'B304',piso:3,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:111905,cliente:"Ricardo Schiffini",asesor:"Samuel Paya",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9012,edificio:'B',unidad:'B305',piso:3,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:168495,cliente:"Sandra Giron",asesor:"Sandra Lake",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
@@ -608,9 +615,9 @@ const SEED = [
   {id:9016,edificio:'B',unidad:'B401',piso:4,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:214216,cliente:"Nurys Velasquez",asesor:"Bienvenido Paulino",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9017,edificio:'B',unidad:'B402',piso:4,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:158110,cliente:"Joan Tavarez",asesor:"Raquel Veliz",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9018,edificio:'B',unidad:'B403',piso:4,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:168311,cliente:"Juan Chalas",asesor:"Juan Chalas",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9019,edificio:'B',unidad:'B404',piso:4,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:112206,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
-  {id:9020,edificio:'B',unidad:'B405',piso:4,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:168311,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
-  {id:9021,edificio:'B',unidad:'B406',piso:4,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:158110,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9019,edificio:'B',unidad:'B404',piso:4,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:112206,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9020,edificio:'B',unidad:'B405',piso:4,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:168311,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9021,edificio:'B',unidad:'B406',piso:4,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:158110,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9022,edificio:'B',unidad:'B407',piso:4,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:214216,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9023,edificio:'B',unidad:'B408',piso:4,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:158110,cliente:"White Matis",asesor:"Luis Rodriguez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9024,edificio:'B',unidad:'B501',piso:5,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:216358,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
@@ -627,7 +634,7 @@ const SEED = [
   {id:9035,edificio:'B',unidad:'B604',piso:6,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:114461,cliente:"Felipe Debrand",asesor:"Oliver Reyes",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9036,edificio:'B',unidad:'B605',piso:6,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:171694,cliente:"Awilda Rodriguez",asesor:"Eduardo Dargham",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9037,edificio:'B',unidad:'B606',piso:6,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:161288,cliente:"Alejandro Ozuna",asesor:"Reymer Ramirez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9038,edificio:'B',unidad:'B607',piso:6,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:218522,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9038,edificio:'B',unidad:'B607',piso:6,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:218522,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9039,edificio:'B',unidad:'B608',piso:6,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:161288,cliente:"Melby Aquino",asesor:"Oliver Reyes",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9040,edificio:'B',unidad:'B701',piso:7,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:220707,cliente:"Jose Ambiorix Estevez",asesor:"Carlos Maldonado",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9041,edificio:'B',unidad:'B702',piso:7,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:162901,cliente:"Meyra Ventura",asesor:"Starlyn Zapata",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
@@ -639,14 +646,14 @@ const SEED = [
   {id:9047,edificio:'B',unidad:'B708',piso:7,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:162901,cliente:"Duverge y Asociados",asesor:"Lis Gonzalez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9048,edificio:'C',unidad:'C201',piso:2,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:220495,cliente:"Joel Martinez",asesor:"Jael Hernandez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9049,edificio:'C',unidad:'C202',piso:2,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:154995,cliente:"Juana Sanchez",asesor:"Jacqueline Sanchez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9050,edificio:'C',unidad:'C203',piso:2,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:173245,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9050,edificio:'C',unidad:'C203',piso:2,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:173245,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9051,edificio:'C',unidad:'C204',piso:2,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:115495,cliente:"Kenia Moreta",asesor:"Carlos Maldonado",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9052,edificio:'C',unidad:'C205',piso:2,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:173245,cliente:"Clara Fernandez",asesor:"Victor Gomez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9053,edificio:'C',unidad:'C206',piso:2,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:162745,cliente:"Maria Trinidad",asesor:"Cristel Mejia",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9054,edificio:'C',unidad:'C207',piso:2,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:220495,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9054,edificio:'C',unidad:'C207',piso:2,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:220495,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9055,edificio:'C',unidad:'C208',piso:2,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:162745,cliente:"Henry Francisco Placeres",asesor:"Juana Soto",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9056,edificio:'C',unidad:'C301',piso:3,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:222700,cliente:"Luis Migueles Mendez",asesor:"Starlyn Castro",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9057,edificio:'C',unidad:'C302',piso:3,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:164372,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9057,edificio:'C',unidad:'C302',piso:3,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:164372,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9058,edificio:'C',unidad:'C303',piso:3,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:166645,cliente:"Claudia Roa",asesor:"Claudia Roa",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9059,edificio:'C',unidad:'C304',piso:3,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:156545,cliente:"Jesus Rosado",asesor:"Lis Gonzalez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9060,edificio:'C',unidad:'C305',piso:3,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:166645,cliente:"As Henriquez",asesor:"Claudia Roa",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
@@ -667,7 +674,7 @@ const SEED = [
   {id:9075,edificio:'C',unidad:'C504',piso:5,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:118994,cliente:"Eileen Ramirez",asesor:"Reymer Ramirez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9076,edificio:'C',unidad:'C505',piso:5,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:178494,cliente:"Juan Sierra",asesor:"Lis Gonzalez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9077,edificio:'C',unidad:'C506',piso:5,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:113328,cliente:"Crisol Tejeda",asesor:"Jacqueline Sanchez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9078,edificio:'C',unidad:'C507',piso:5,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:227176,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9078,edificio:'C',unidad:'C507',piso:5,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:227176,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9079,edificio:'C',unidad:'C508',piso:5,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:167676,cliente:"Ruben Neftali Jimenez",asesor:"Rafael Rodriguez",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9080,edificio:'C',unidad:'C601',piso:6,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:229448,cliente:"Alfredo Garcia",asesor:"Luis Rodriguez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9081,edificio:'C',unidad:'C602',piso:6,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:169353,cliente:"Cohen Rodriguez",asesor:"Alexandra Ortiz",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
@@ -689,10 +696,10 @@ const SEED = [
   {id:9097,edificio:'D',unidad:'D202',piso:2,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:170882,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9098,edificio:'D',unidad:'D203',piso:2,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:190569,cliente:"Jose Anibal Baez",asesor:"Manuel Acosta",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9099,edificio:'D',unidad:'D204',piso:2,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:121269,cliente:"Alexander Franklyn Presbot",asesor:"Raquel Veliz",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9100,edificio:'D',unidad:'D205',piso:2,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:190569,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9100,edificio:'D',unidad:'D205',piso:2,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:190569,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9101,edificio:'D',unidad:'D206',piso:2,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:170882,cliente:"Damaris Decena",asesor:"Jovanny Brea",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9102,edificio:'D',unidad:'D207',piso:2,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:231519,cliente:"Johan Santiago",asesor:"Rayaneri Ruiz",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9103,edificio:'D',unidad:'D208',piso:2,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:170882,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9103,edificio:'D',unidad:'D208',piso:2,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:170882,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9104,edificio:'D',unidad:'D301',piso:3,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:233835,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9105,edificio:'D',unidad:'D302',piso:3,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:172591,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9106,edificio:'D',unidad:'D303',piso:3,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:192475,cliente:"Raul Favila Lazaro",asesor:"Carlos Maldonado",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
@@ -701,18 +708,18 @@ const SEED = [
   {id:9109,edificio:'D',unidad:'D306',piso:3,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:172591,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9110,edificio:'D',unidad:'D307',piso:3,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:233835,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9111,edificio:'D',unidad:'D308',piso:3,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:172591,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9112,edificio:'D',unidad:'D401',piso:4,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:236173,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9112,edificio:'D',unidad:'D401',piso:4,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:236173,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9113,edificio:'D',unidad:'D402',piso:4,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:174317,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9114,edificio:'D',unidad:'D403',piso:4,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:194400,cliente:"Juan Rodriguez",asesor:"Liset Gonzalez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9115,edificio:'D',unidad:'D404',piso:4,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:123707,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9115,edificio:'D',unidad:'D404',piso:4,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:123707,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9116,edificio:'D',unidad:'D405',piso:4,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:194400,cliente:"Ruben Neftali Jimenez",asesor:"Rafael Rodriguez",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9117,edificio:'D',unidad:'D406',piso:4,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:174317,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9118,edificio:'D',unidad:'D407',piso:4,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:236173,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9118,edificio:'D',unidad:'D407',piso:4,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:236173,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9119,edificio:'D',unidad:'D408',piso:4,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:174317,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9120,edificio:'D',unidad:'D501',piso:5,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:238535,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9120,edificio:'D',unidad:'D501',piso:5,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:238535,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9121,edificio:'D',unidad:'D502',piso:5,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:176060,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9122,edificio:'D',unidad:'D503',piso:5,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:196344,cliente:"Esteban De La Cruz Ozuna",asesor:"Starlyn Castro",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9123,edificio:'D',unidad:'D504',piso:5,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:124944,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9123,edificio:'D',unidad:'D504',piso:5,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:124944,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
   {id:9124,edificio:'D',unidad:'D505',piso:5,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:196344,cliente:"Medina Sanchez",asesor:"Sara Zacarias",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9125,edificio:'D',unidad:'D506',piso:5,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:176060,cliente:"",asesor:"",estado:'disponible',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9126,edificio:'D',unidad:'D507',piso:5,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:238535,cliente:"Bacilio Cedeno Glass",asesor:"Victor Gomez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
@@ -731,12 +738,12 @@ const SEED = [
   {id:9139,edificio:'D',unidad:'D704',piso:7,m2:55,vista:"Jard\u00edn",caract:"1 Hab \u00b7 1 Ba\u00f1o",precio:127455,cliente:"Wendy Cepeda",asesor:"Natalia Pichardo",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9140,edificio:'D',unidad:'D705',piso:7,m2:85,vista:"Piscina",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:200290,cliente:"Ivan Trujillo",asesor:"Victor Gomez",estado:'reservado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
   {id:9141,edificio:'D',unidad:'D706',piso:7,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:179599,cliente:"Wilkin Peguero",asesor:"Sandra Lake",estado:'bloqueado',fecha:new Date().toISOString(),nota:"",cedula:'',docCedula:'',docComp:''},
-  {id:9142,edificio:'D',unidad:'D707',piso:7,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:243329,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
-  {id:9143,edificio:'D',unidad:'D708',piso:7,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:179599,cliente:"",asesor:"",estado:'reservado',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''}
+  {id:9142,edificio:'D',unidad:'D707',piso:7,m2:115,vista:"Piscina",caract:"3 Hab \u00b7 2.5 Ba\u00f1os",precio:243329,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''},
+  {id:9143,edificio:'D',unidad:'D708',piso:7,m2:85,vista:"Jard\u00edn",caract:"2 Hab \u00b7 2 Ba\u00f1os",precio:179599,cliente:"",asesor:"",estado:'constructora',fecha:new Date().toISOString(),nota:"\u26a0\ufe0f Reservado por constructora \u2014 sin asesor Plusval",cedula:'',docCedula:'',docComp:''}
 ];
 
 /* ═══════════ STATE ═══════════ */
-let ventas = JSON.parse(localStorage.getItem('vcb_cv_v7') || 'null');
+let ventas = JSON.parse(localStorage.getItem('vcb_cv_v11') || 'null');
 if (!ventas) {
   ventas = SEED.map((s,i) => ({
     id: s.id||8000+i,
@@ -765,7 +772,7 @@ let adminOn = false, coordOn = false;
 let docFile = null, activeUnit = null, activeWLUnit = null;
 let timerIv = null;
 
-function saveV(){ try{ localStorage.setItem('vcb_cv_v7', JSON.stringify(ventas)); }catch(e){} }
+function saveV(){ try{ localStorage.setItem('vcb_cv_v11', JSON.stringify(ventas)); }catch(e){} }
 function saveWL(){ try{ localStorage.setItem('vcb_wl_cv', JSON.stringify(wl)); }catch(e){} }
 function gV(code){ return ventas.find(v=>v.unidad===code); }
 function wlCount(code){ return wl.filter(r=>r.unidad===code).length; }
@@ -785,20 +792,25 @@ function timeLeft(v){
 }
 
 function stLabel(st){ return {disponible:'Disponible',bloqueado:'Bloqueado',reservado:'Reservado',vendido:'Vendido',vencido:'Vencido ⚠️'}[st]||st; }
-function stPill(st){ const m={disponible:'pk',bloqueado:'pa',reservado:'pb',vendido:'pg',vencido:'pr'}; return `<span class="pill ${m[st]||'pk'}">${stLabel(st)}</span>`; }
+function stPill(st){ const m={disponible:'pk',bloqueado:'pa',reservado:'pb',vendido:'pg',vencido:'pr',constructora:'pc'}; return `<span class="pill ${m[st]||'pk'}">${stLabel(st)}</span>`; }
 
 /* ─── KPIs ─── */
 function renderKPIs(){
   checkVencidos();
-  const c={total:0,vendido:0,reservado:0,bloqueado:0,vencido:0,disponible:0,sin_asesor:0};
+  const c={total:0,vendido:0,reservado:0,bloqueado:0,vencido:0,disponible:0,sin_asesor:0,constructora:0};
   Object.keys(CATALOG).forEach(code=>{
     const v=gV(code); const st=v?v.estado:'disponible';
-    c.total++; c[st]=(c[st]||0)+1;
+    c.total++;
+    if(st==='constructora'){
+      c.constructora++;
+    } else {
+      c[st]=(c[st]||0)+1;
+    }
     if(v && v.estado==='reservado' && !v.cliente) c.sin_asesor++;
   });
   document.getElementById('kpis').innerHTML=
-    ['total','reservado','bloqueado','vencido','disponible','sin_asesor']
-    .map(k=>`<div class="kpi ${k}"><div class="kpi-n">${c[k]||0}</div><div class="kpi-l">${{total:'Total',reservado:'Reservadas',bloqueado:'Bloqueadas',vencido:'Vencidas ⚠️',disponible:'Disponibles',sin_asesor:'Sin asesor Plusval'}[k]}</div></div>`)
+    ['total','reservado','bloqueado','vencido','disponible','constructora']
+    .map(k=>`<div class="kpi ${k}"><div class="kpi-n">${c[k]||0}</div><div class="kpi-l">${{total:'Total',reservado:'Reservadas',bloqueado:'Bloqueadas',vencido:'Vencidas ⚠️',disponible:'Disponibles',sin_asesor:'Sin asesor Plusval',constructora:'Reservada constructora'}[k]}</div></div>`)
     .join('');
   const alr=c.vencido||0;
   ['coord-badge','coord-tab-badge'].forEach(id=>{
@@ -981,7 +993,7 @@ function showBloqForm(){
     <div class="frow fw"><div class="fg"><label>Notas</label><textarea id="bno" placeholder="Condiciones..."></textarea></div></div>
     <div style="background:var(--amber-l);border-radius:var(--r);padding:8px 11px;font-size:11px;color:#854f0b;margin-bottom:10px;display:flex;align-items:center;gap:6px">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Bloqueo por <strong>24 horas</strong>. La cédula se guarda en Drive automáticamente.
+      Bloqueo por <strong>12 horas</strong>. La cédula se guarda en Drive automáticamente.
     </div>
     <div class="abtns">
       <button class="abtn btn-blq" onclick="confirmarBloq('${code}')"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Confirmar bloqueo</button>
