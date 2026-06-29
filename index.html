@@ -429,8 +429,8 @@ const BLOQUEO_H         = 2;
 const WL_MAX            = 3;
 const EDIFICIOS_CONFIG = {
   'A':{nombre:'Edificio A',vta:false,wl:false},
-  'B':{nombre:'Edificio B',vta:true, wl:false},
-  'C':{nombre:'Edificio C',vta:true, wl:false},
+  'B':{nombre:'Edificio B',vta:true, wl:true},
+  'C':{nombre:'Edificio C',vta:true, wl:true},
   'D':{nombre:'Edificio D',vta:true, wl:true},
   'E':{nombre:'Edificio E',vta:false,wl:false},
   'F':{nombre:'Edificio F',vta:false,wl:false},
@@ -446,7 +446,17 @@ const EDIFICIOS_CONFIG = {
   'P':{nombre:'Edificio P',vta:false,wl:false},
   'Q':{nombre:'Edificio Q',vta:false,wl:false},
 };
-(function(){ const s=JSON.parse(localStorage.getItem('vcb_ecfg')||'null'); if(s) Object.keys(s).forEach(k=>{ if(EDIFICIOS_CONFIG[k]) Object.assign(EDIFICIOS_CONFIG[k],s[k]); }); })();
+(function(){ 
+  const s=JSON.parse(localStorage.getItem('vcb_ecfg')||'null'); 
+  if(s) Object.keys(s).forEach(k=>{ 
+    if(EDIFICIOS_CONFIG[k]){
+      // vta persists from localStorage; wl always uses code default (admin can still toggle live)
+      if(typeof s[k].vta !== 'undefined') EDIFICIOS_CONFIG[k].vta = s[k].vta;
+      // wl: only override if localStorage has it true AND code also allows vta
+      if(s[k].wl === true && EDIFICIOS_CONFIG[k].vta) EDIFICIOS_CONFIG[k].wl = true;
+    }
+  }); 
+})();
 function saveECfg(){ try{ localStorage.setItem('vcb_ecfg',JSON.stringify(Object.fromEntries(Object.entries(EDIFICIOS_CONFIG).map(([k,v])=>[k,{vta:v.vta,wl:v.wl}])))); }catch(e){} }
 const EDIFICIOS = Object.keys(EDIFICIOS_CONFIG).filter(k=>EDIFICIOS_CONFIG[k].vta);
 const PISOS_VTA = [8,7,6,5,4,3,2,1];
