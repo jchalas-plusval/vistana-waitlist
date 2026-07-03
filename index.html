@@ -1606,7 +1606,77 @@ function renderWLTable(){
     <td style="font-size:10px">${r.asesor}</td>
     <td style="text-align:center">${r.listo?'<span style="color:var(--green);font-size:13px">✓</span>':'—'}</td>
     <td style="font-size:10px;color:var(--warm)">${r.fecha}</td>
+    ${adminOn?`<td style="white-space:nowrap">
+      <button onclick="wlEdit('${r.id}')" style="background:none;border:1px solid var(--stone);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;margin-right:4px">✏️ Editar</button>
+      <button onclick="wlDelete('${r.id}')" style="background:none;border:1px solid #fca5a5;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;color:#dc2626">🗑 Borrar</button>
+    </td>`:''}
   </tr>`).join('');
+}
+
+function wlDelete(id){
+  const rec = wl.find(r=>String(r.id)===String(id));
+  if(!rec) return;
+  if(!confirm(`¿Borrar el registro de ${rec.nombre} (${rec.unidad})?`)) return;
+  wl = wl.filter(r=>String(r.id)!==String(id));
+  saveWL();
+  // Notificar al Apps Script para borrar del sheet
+  fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({action:'deleteWL', id: String(id)})});
+  renderWLFloors(); renderWLTable();
+}
+
+function wlEdit(id){
+  const rec = wl.find(r=>String(r.id)===String(id));
+  if(!rec) return;
+  // Mostrar modal de edición inline
+  const overlay = document.getElementById('ov-wl');
+  document.getElementById('wl-m-body').innerHTML=`
+    <div style="background:var(--cream);border-radius:8px;padding:12px;margin-bottom:12px;font-size:11px;color:var(--warm)">
+      Editando: <strong>${rec.unidad}</strong> · ${rec.fecha}
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Nombre *</label><input type="text" id="we-n" value="${rec.nombre}"></div>
+      <div class="fg"><label>Cédula *</label><input type="text" id="we-c" value="${rec.cedula}"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Teléfono *</label><input type="tel" id="we-t" value="${rec.tel}"></div>
+      <div class="fg"><label>Email</label><input type="email" id="we-e" value="${rec.email||''}"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Asesor *</label><input type="text" id="we-a" value="${rec.asesor}"></div>
+      <div class="fg"><label>Oficina</label>
+        <select id="we-of">
+          ${['HQ','VD','PA','NT','PC'].map(o=>`<option${rec.oficina===o?' selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="rrow"><label>¿Listo para reservar?</label><label class="sw"><input type="checkbox" id="we-r"${rec.listo?' checked':''}><span class="sw-sl"></span></label></div>
+    <div class="frow fw"><div class="fg"><label>Notas</label><textarea id="we-no">${rec.notas||''}</textarea></div></div>
+    <div class="abtns">
+      <button class="abtn btn-apr" onclick="wlEditSave('${id}')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Guardar cambios</button>
+      <button class="abtn btn-can" onclick="closeWL();renderWLTable()">Cancelar</button>
+    </div>`;
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function wlEditSave(id){
+  const rec = wl.find(r=>String(r.id)===String(id));
+  if(!rec) return;
+  rec.nombre  = document.getElementById('we-n')?.value.trim()||rec.nombre;
+  rec.cedula  = document.getElementById('we-c')?.value.trim()||rec.cedula;
+  rec.tel     = document.getElementById('we-t')?.value.trim()||rec.tel;
+  rec.email   = document.getElementById('we-e')?.value.trim()||'';
+  rec.asesor  = document.getElementById('we-a')?.value.trim()||rec.asesor;
+  rec.oficina = document.getElementById('we-of')?.value||rec.oficina;
+  rec.listo   = document.getElementById('we-r')?.checked||false;
+  rec.notas   = document.getElementById('we-no')?.value.trim()||'';
+  saveWL();
+  // Notificar Apps Script para actualizar en sheet
+  fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({action:'updateWL', data: rec})});
+  closeWL();
+  renderWLFloors(); renderWLTable();
 }
 
 /* ─── HELPERS ─── */
