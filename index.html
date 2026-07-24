@@ -11,6 +11,7 @@
   --lime:#b8d44a;--lime-d:#8fad1e;--green:#3b6d11;--green-d:#27500a;--green-l:#eaf3de;
   --cream:#f8f6f0;--stone:#e8e4d9;--warm:#6b6456;--ink:#1e1c18;
   --amber:#ef9f27;--amber-l:#faeeda;--red:#e24b4a;--red-l:#fcebeb;
+  --gold:#c8860a;--gold-l:#fef7e6;--teal:#0f766e;--teal-l:#e6f7f5;
   --blue:#185fa5;--blue-l:#e6f1fb;--purple:#7c3aed;--purple-l:#ede9fe;
   --r:10px;--rlg:16px;--sh:0 2px 16px rgba(30,28,24,.10);--shmd:0 8px 32px rgba(30,28,24,.16);
 }
@@ -40,6 +41,7 @@ h1.pg{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;mar
 .kpi{background:#fff;border:1px solid var(--stone);border-radius:var(--r);padding:11px 13px;position:relative;overflow:hidden}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
 .kpi.total::before{background:var(--ink)}.kpi.vendido::before{background:var(--green)}
+.kpi.contrato5::before{background:var(--gold)}.kpi.contrato10::before{background:var(--teal)}
 .kpi.reservado::before{background:var(--blue)}.kpi.bloqueado::before{background:var(--amber)}
 .kpi.vencido::before{background:var(--red)}.kpi.disponible::before{background:var(--stone)}
 .kpi.constructora::before{background:#9ca3af}
@@ -81,6 +83,8 @@ h1.pg{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;mar
 .uc.bloqueado{background:var(--amber-l);border-color:var(--amber)}
 .uc.reservado{background:var(--blue-l);border-color:var(--blue)}
 .uc.vendido{background:var(--green-l);border-color:var(--green)}
+.uc.contrato5{background:var(--gold-l);border-color:var(--gold)}
+.uc.contrato10{background:var(--teal-l);border-color:var(--teal)}
 .uc.vencido{background:var(--red-l);border-color:var(--red);animation:pr 2s infinite}
 .uc.constructora{background:#f0f0f0;border-color:#9ca3af;cursor:default}
 .uc.constructora:hover{transform:none;box-shadow:none}
@@ -98,6 +102,7 @@ h1.pg{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;mar
 .uc-st{font-size:8px;font-weight:600;display:block;margin-top:1px;text-transform:uppercase}
 .uc.disponible .uc-st{color:var(--warm)}.uc.bloqueado .uc-st{color:#854f0b}
 .uc.reservado .uc-st{color:var(--blue)}.uc.vendido .uc-st{color:var(--green-d)}
+.uc.contrato5 .uc-st{color:var(--gold)}.uc.contrato10 .uc-st{color:var(--teal)}
 .uc.vencido .uc-st{color:var(--red)}
 .uc-timer{font-size:8px;font-weight:700;display:block;margin-top:2px;color:#854f0b}
 .uc-timer.urg{color:var(--red)}
@@ -233,6 +238,7 @@ tr:hover td{background:#fafaf7}
 .pg{background:var(--green-l);color:var(--green-d)}.pa{background:var(--amber-l);color:#854f0b}
 .pb{background:var(--blue-l);color:var(--blue)}.pr{background:var(--red-l);color:#a32d2d}
 .pk{background:var(--stone);color:var(--warm)}.pp{background:var(--purple-l);color:var(--purple)}.pc{background:#f3f4f6;color:#4b5563}.pn{background:#fef3c7;color:#92400e}
+.p5{background:var(--gold-l);color:var(--gold)}.p10{background:var(--teal-l);color:var(--teal)}
 .empty-s{text-align:center;padding:2.5rem;color:var(--warm)}
 .empty-s svg{width:30px;height:30px;stroke:var(--stone);fill:none;stroke-width:1.5;display:block;margin:0 auto 8px}
 
@@ -311,6 +317,10 @@ tr:hover td{background:#fafaf7}
     <div class="hdr-name">Vistana <span>Costa Blanca</span></div>
   </div>
   <div class="hdr-right">
+    <button class="hbtn" id="cierres-btn" onclick="showPanelCierres()" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Cierres <span class="abadge" id="cierres-badge" style="display:none">0</span>
+    </button>
     <button class="hbtn" id="coord-btn" onclick="toggleCoord()">
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       Coordinadora <span class="abadge" id="coord-badge" style="display:none">0</span>
@@ -402,6 +412,27 @@ tr:hover td{background:#fafaf7}
       <div id="wl-empty" class="empty-s" style="display:none"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/></svg><p>Sin registros aún.</p></div>
     </div>
   </div>
+  <!-- PANEL CIERRES -->
+  <div id="p-cierres" class="panel" style="display:none">
+    <div style="max-width:900px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap">
+        <button onclick="showMainPanel()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1.5px solid var(--stone);border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;color:var(--warm)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver al mapa</button>
+        <h2 style="font-size:16px;font-weight:700;margin:0">Panel de Cierres</h2>
+        <div style="flex:1"></div>
+        <div id="cierres-resumen" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+      </div>
+      <div id="cierres-filtros" style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="etab on" id="cf-all" onclick="filterCierres('all',this)">Todos</button>
+        <button class="etab" id="cf-c5" onclick="filterCierres('5',this)">Contrato 5%</button>
+        <button class="etab" id="cf-c10" onclick="filterCierres('10',this)">Contrato 10%</button>
+        <button class="etab" id="cf-B" onclick="filterCierres('B',this)">Edificio B</button>
+        <button class="etab" id="cf-C" onclick="filterCierres('C',this)">Edificio C</button>
+        <button class="etab" id="cf-D" onclick="filterCierres('D',this)">Edificio D</button>
+      </div>
+      <div id="cierres-tabla"></div>
+    </div>
+  </div>
+
 </main>
 
 <!-- MODAL UNIDAD -->
@@ -419,8 +450,8 @@ tr:hover td{background:#fafaf7}
 
 <script>
 /* ═══════════ CONFIG ═══════════ */
-const SCRIPT_URL        = 'https://script.google.com/macros/s/AKfycbx-BqJUDPVDgU8QXIsb4KVrMtZeuU68ZW7M6INEHe2oTE4hKxaZX_gz583U44VKDFNM/exec';
-const PROXY_URL         = 'https://script.google.com/macros/s/AKfycbx-BqJUDPVDgU8QXIsb4KVrMtZeuU68ZW7M6INEHe2oTE4hKxaZX_gz583U44VKDFNM/exec';
+const SCRIPT_URL        = 'https://script.google.com/macros/s/AKfycbwwsU3Zf69U0pDKHFixWFWIWb00Egq5gcgYRZz1y-U5hzcx7Z-Y3QtjfVu6tAHYoOvh7w/exec';
+const PROXY_URL         = 'https://script.google.com/macros/s/AKfycbwwsU3Zf69U0pDKHFixWFWIWb00Egq5gcgYRZz1y-U5hzcx7Z-Y3QtjfVu6tAHYoOvh7w/exec';
 const FOLDER_CEDULAS    = '13CWabEbAkHZh7Sl2ppuJptDrJTUTPZOA';
 const FOLDER_COMP       = '1B4wAeJfwrwazQ8s2PP6yUKtsRDW9ipTl';
 const SHEET_VENTAS      = '1tpr9HcPsiIy48KJKecC0nVTfxp_h1YITIA-_hUaCBYA';
@@ -763,8 +794,8 @@ const SEED = [
 
 /* ═══════════ STATE ═══════════ */
 /* ─── STORAGE INIT v16 — SEED siempre gana en datos maestros ─── */
-const STORAGE_KEY = 'vcb_cv_v16';
-const PREV_KEY    = 'vcb_cv_v15';
+const STORAGE_KEY = 'vcb_cv_v17';
+const PREV_KEY    = 'vcb_cv_v16';
 
 function buildFromSeed(){
   const tsData = JSON.parse(localStorage.getItem('vcb_ts_v1')||'{}');
@@ -797,17 +828,24 @@ if(_raw16){
   ventas = buildFromSeed().map(seedUnit => {
     const sv = savedMap[seedUnit.unidad];
     if(!sv) return seedUnit; // new unit in SEED, use SEED
-    // SEED wins on: estado, cliente, asesor, nota, precio (master data)
-    // localStorage wins on: docCedula, docComp, cedula (docs uploaded manually)
-    // For bloqueo_ts: keep localStorage ts if unit is still bloqueado in SEED
+    // Advanced states in localStorage always win over SEED
+    // (contrato5, contrato10, vendido, bloqueado = user actions that must persist)
+    const advancedStates = ['contrato5','contrato10','vendido','bloqueado'];
+    const localIsAdvanced = advancedStates.includes(sv.estado);
     return {
       ...seedUnit,
+      // Keep localStorage estado/nota/cliente/asesor if it's an advanced state
+      estado:    localIsAdvanced ? sv.estado    : seedUnit.estado,
+      nota:      localIsAdvanced ? sv.nota      : seedUnit.nota,
+      cliente:   localIsAdvanced ? (sv.cliente||seedUnit.cliente) : seedUnit.cliente,
+      asesor:    localIsAdvanced ? (sv.asesor||seedUnit.asesor)   : seedUnit.asesor,
+      // Docs always from localStorage
       docCedula: sv.docCedula||seedUnit.docCedula,
       docComp:   sv.docComp  ||seedUnit.docComp,
       cedula:    sv.cedula   ||seedUnit.cedula,
-      bloqueo_ts: seedUnit.estado==='bloqueado'
+      bloqueo_ts: (localIsAdvanced && sv.estado==='bloqueado')
         ? (sv.bloqueo_ts||seedUnit.bloqueo_ts||Date.now())
-        : null
+        : seedUnit.estado==='bloqueado' ? (sv.bloqueo_ts||Date.now()) : null
     };
   });
 } else if(_raw15){
@@ -817,14 +855,20 @@ if(_raw16){
   ventas = buildFromSeed().map(seedUnit => {
     const sv = savedMap[seedUnit.unidad];
     if(!sv) return seedUnit;
+    const advancedStates = ['contrato5','contrato10','vendido','bloqueado'];
+    const localIsAdvanced = advancedStates.includes(sv.estado);
     return {
       ...seedUnit,
+      estado:    localIsAdvanced ? sv.estado    : seedUnit.estado,
+      nota:      localIsAdvanced ? sv.nota      : seedUnit.nota,
+      cliente:   localIsAdvanced ? (sv.cliente||seedUnit.cliente) : seedUnit.cliente,
+      asesor:    localIsAdvanced ? (sv.asesor||seedUnit.asesor)   : seedUnit.asesor,
       docCedula: sv.docCedula||seedUnit.docCedula,
       docComp:   sv.docComp  ||seedUnit.docComp,
       cedula:    sv.cedula   ||seedUnit.cedula,
-      bloqueo_ts: seedUnit.estado==='bloqueado'
+      bloqueo_ts: (localIsAdvanced && sv.estado==='bloqueado')
         ? (sv.bloqueo_ts||seedUnit.bloqueo_ts||Date.now())
-        : null
+        : seedUnit.estado==='bloqueado' ? (sv.bloqueo_ts||Date.now()) : null
     };
   });
 } else {
@@ -892,13 +936,13 @@ function timeLeft(v){
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-function stLabel(st){ return {disponible:'Disponible',bloqueado:'Bloqueado',reservado:'Reservado',vendido:'Vendido',vencido:'Vencido ⚠️'}[st]||st; }
-function stPill(st){ const m={disponible:'pk',bloqueado:'pa',reservado:'pb',vendido:'pg',vencido:'pr',constructora:'pc',pendiente:'pn'}; return `<span class="pill ${m[st]||'pk'}">${stLabel(st)}</span>`; }
+function stLabel(st){ return {disponible:'Disponible',bloqueado:'Bloqueado',reservado:'Reservado',vendido:'Vendido',vencido:'Vencido ⚠️',constructora:'Constructora',contrato5:'Contrato 5%',contrato10:'Contrato 10% ✓'}[st]||st; }
+function stPill(st){ const m={disponible:'pk',bloqueado:'pa',reservado:'pb',vendido:'pg',vencido:'pr',constructora:'pc',pendiente:'pn',contrato5:'p5',contrato10:'p10'}; return `<span class="pill ${m[st]||'pk'}">${stLabel(st)}</span>`; }
 
 /* ─── KPIs ─── */
 function renderKPIs(){
   checkVencidos();
-  const c={total:0,vendido:0,reservado:0,bloqueado:0,vencido:0,disponible:0,sin_asesor:0,constructora:0,pendiente:0};
+  const c={total:0,vendido:0,contrato10:0,contrato5:0,reservado:0,bloqueado:0,vencido:0,disponible:0,sin_asesor:0,constructora:0,pendiente:0};
   Object.keys(CATALOG).forEach(code=>{
     const v=gV(code); const st=v?v.estado:'disponible';
     c.total++;
@@ -912,8 +956,8 @@ function renderKPIs(){
     if(v && v.estado==='reservado' && !v.cliente) c.sin_asesor++;
   });
   document.getElementById('kpis').innerHTML=
-    ['total','reservado','bloqueado','pendiente','constructora','disponible']
-    .map(k=>`<div class="kpi ${k}"><div class="kpi-n">${c[k]||0}</div><div class="kpi-l">${{total:'Total',reservado:'Reservadas',bloqueado:'Bloqueadas',vencido:'Vencidas ⚠️',disponible:'Disponibles',sin_asesor:'Sin asesor Plusval',constructora:'Constructora',pendiente:'Pendiente liberar'}[k]}</div></div>`)
+    ['total','reservado','bloqueado','contrato5','contrato10','disponible','constructora','pendiente']
+    .map(k=>`<div class="kpi ${k}"><div class="kpi-n">${c[k]||0}</div><div class="kpi-l">${{total:'Total',reservado:'Reservadas',bloqueado:'Bloqueadas',vencido:'Vencidas ⚠️',disponible:'Disponibles',sin_asesor:'Sin asesor Plusval',constructora:'Constructora',pendiente:'Pendiente liberar',contrato5:'Contrato 5%',contrato10:'Contrato 10% ✓'}[k]}</div></div>`)
     .join('');
   const alr=c.vencido||0;
   ['coord-badge','coord-tab-badge'].forEach(id=>{
@@ -1002,7 +1046,8 @@ function openM(code, cat, venta){
     reservado:{cls:'res',ico:'<polyline points="20 6 9 17 4 12"/>',txt:'Reservada — comprobante recibido'},
     vendido:{cls:'vend',ico:'<polyline points="20 6 9 17 4 12"/>',txt:'Vendida'},
     vencido:{cls:'venc',ico:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',txt:'⚠️ Bloqueo vencido — requiere acción'},
-    pendiente:{cls:'bloq',ico:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',txt:'⚠️ Pendiente de confirmar en control Plusval'},
+    contrato5:{cls:'bloq',ico:'<polyline points="20 6 9 17 4 12"/>',txt:'Contrato firmado al 5% — pendiente completar al 10%'},
+    contrato10:{cls:'res',ico:'<polyline points="20 6 9 17 4 12"/>',txt:'✓ Contrato 10% completado — comisión disponible'},
     constructora:{cls:'bloq',ico:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',txt:'Reservada por constructora — sin asesor Plusval'},
   };
   const sb=sbMap[st]||sbMap.disponible;
@@ -1035,6 +1080,23 @@ function openM(code, cat, venta){
       <button class="abtn btn-lib" onclick="liberarU('${code}')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>Liberar</button>
       <button class="abtn btn-apr" onclick="openComp('${code}')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Aprobar igual</button>
     </div>`:`<p style="font-size:12px;color:var(--red);text-align:center;padding:8px">⚠️ Contacta a la coordinadora para liberar esta unidad.</p>`;
+  } else if(st==='reservado'){
+    btns=`<div class="abtns">
+      <button class="abtn btn-apr" onclick="showCierreForm('${code}','5')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Registrar Contrato 5%</button>
+      <button class="abtn btn-res" onclick="showCierreForm('${code}','10')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Registrar Contrato 10%</button>
+    </div>`;
+  } else if(st==='contrato5'){
+    btns=`<div class="abtns">
+      <button class="abtn btn-res" onclick="showCierreForm('${code}','10')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Completar al 10%</button>
+      ${adminOn?`<button class="abtn btn-lib" onclick="cambiarSt('${code}','reservado')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>Revertir a Reservado</button>`:''}
+    </div>`;
+  } else if(st==='contrato10'){
+    btns=`<div class="abtns" style="background:var(--teal-l);border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:12px;color:var(--teal);font-weight:600;margin-bottom:6px">✓ Contrato 10% — Comisión disponible</div>
+      <div style="font-size:13px;font-weight:700;color:var(--teal)">USD ${fmtN(Math.round((CATALOG[code]?.precio||v?.precio||0)*0.025))}</div>
+      <div style="font-size:10px;color:var(--teal);margin-top:2px">2.5% del precio de venta</div>
+    </div>
+    ${adminOn?`<div class="abtns" style="margin-top:7px"><button class="abtn btn-vnd" onclick="cambiarSt('${code}','vendido')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Marcar vendida</button></div>`:''}`;
   } else if(st==='reservado'&&adminOn){
     btns=`<div class="abtns">
       <button class="abtn btn-vnd" onclick="cambiarSt('${code}','vendido')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Marcar vendida</button>
@@ -1296,6 +1358,143 @@ function liberarU(code){ if(!confirm(`¿Liberar ${code}?`)) return; const idx=ve
   try { const tsData=JSON.parse(localStorage.getItem('vcb_ts_v1')||'{}'); delete tsData[code]; localStorage.setItem('vcb_ts_v1',JSON.stringify(tsData)); } catch(e) {}
   closeM(); renderFloors(); renderKPIs(); }
 function cambiarSt(code,st){ const v=gV(code); if(!v) return; v.estado=st; if(st==='vendido') delete v.bloqueo_ts; saveV(); closeM(); renderFloors(); renderKPIs(); }
+
+/* ─── CIERRE DE CONTRATO ─── */
+let cierres = JSON.parse(localStorage.getItem('vcb_cierres_v1')||'[]');
+function saveCierres(){ try{ localStorage.setItem('vcb_cierres_v1', JSON.stringify(cierres)); }catch(e){} }
+
+async function loadCierresFromSheet(){
+  try {
+    const url = SCRIPT_URL + '?action=getCierres&t=' + Date.now();
+    const res = await fetch(url, {method:'GET', mode:'cors'});
+    if(res.ok){
+      const data = await res.json();
+      if(Array.isArray(data) && data.length >= 0){
+        // Merge: server wins, keep any local-only entries not yet synced
+        const serverIds = new Set(data.map(r=>String(r.id)));
+        const localOnly = cierres.filter(r=>!serverIds.has(String(r.id)));
+        cierres = [...data, ...localOnly];
+        saveCierres();
+        if(document.getElementById('p-cierres')?.classList.contains('on')) renderCierres();
+        // Update badge
+        const b = document.getElementById('cierres-badge');
+        const n10 = cierres.filter(r=>r.pct==='10').length;
+        if(b){ b.textContent=n10; b.style.display=n10?'inline-block':'none'; }
+      }
+    }
+  } catch(e){ console.warn('Cierres sync error:', e.message); }
+}
+
+function showCierreForm(code, pct){
+  const v = gV(code);
+  const cat = CATALOG[code]||{};
+  const precio = v?.precio||cat.precio||0;
+  const comision_total = Math.round(precio * 0.05);
+  const comision_cobrable = pct==='10' ? Math.round(precio * 0.025) : 0;
+  document.getElementById('m-act').innerHTML=`
+    <div style="background:${pct==='10'?'var(--teal-l)':'var(--gold-l)'};border:1px solid ${pct==='10'?'var(--teal)':'var(--gold)'};border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:11px">
+      <div style="font-weight:700;color:${pct==='10'?'var(--teal)':'var(--gold)'};margin-bottom:4px">Contrato al ${pct}% — ${code}</div>
+      <div style="color:var(--warm)">Precio: <strong>USD ${fmtN(precio)}</strong> · Comisión total: <strong>USD ${fmtN(comision_total)}</strong>${pct==='10'?' · <strong style="color:var(--teal)">Cobrable ahora: USD '+fmtN(comision_cobrable)+'</strong>':''}</div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Fecha de firma *</label><input type="date" id="cf-fecha" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="fg"><label>Monto pagado USD *</label><input type="number" id="cf-monto" placeholder="${pct==='5'?Math.round(precio*0.05):Math.round(precio*0.10)}"></div>
+    </div>
+    <div class="frow fw"><div class="fg"><label>Observaciones</label><textarea id="cf-notas" placeholder="Notas del cierre..."></` + `textarea></div></div>
+    <div class="abtns">
+      <button class="abtn ${pct==='10'?'btn-res':'btn-apr'}" onclick="confirmarCierre('${code}','${pct}')">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar Contrato ${pct}%
+      </button>
+      <button class="abtn btn-can" onclick="openM('${code}',CATALOG['${code}'],gV('${code}'))">Cancelar</button>
+    </div>`;
+}
+
+function confirmarCierre(code, pct){
+  // Read fields
+  const fechaEl  = document.getElementById('cf-fecha');
+  const montoEl  = document.getElementById('cf-monto');
+  const notasEl  = document.getElementById('cf-notas');
+
+  const fecha = fechaEl ? fechaEl.value : new Date().toLocaleDateString('es-DO');
+  const montoRaw = montoEl ? montoEl.value : '';
+  const monto = parseFloat(montoRaw) || 0;
+  const notas = notasEl ? notasEl.value.trim() : '';
+
+  // Show error inline if monto missing
+  if(!monto){
+    const actEl = document.getElementById('m-act');
+    if(montoEl){
+      montoEl.style.border='2px solid var(--red)';
+      montoEl.focus();
+      const err = document.getElementById('cf-monto-err');
+      if(!err){
+        const e = document.createElement('div');
+        e.id='cf-monto-err';
+        e.style.cssText='color:var(--red);font-size:11px;margin-top:4px';
+        e.textContent='Ingresa el monto pagado';
+        montoEl.parentNode.appendChild(e);
+      }
+    }
+    return;
+  }
+
+  const v = gV(code);
+  if(!v){ console.error('No se encontró la unidad',code); return; }
+
+  const precio = v.precio || CATALOG[code]?.precio || 0;
+  const rec = {
+    id: Date.now(),
+    unidad: code, edificio: code[0],
+    piso: v.piso || CATALOG[code]?.piso,
+    cliente: v.cliente, asesor: v.asesor, precio,
+    pct, fecha_firma: fecha, monto_pago: monto,
+    comision_total: Math.round(precio * 0.05),
+    comision_cobrable: pct === '10' ? Math.round(precio * 0.025) : 0,
+    notas,
+    fecha_registro: new Date().toLocaleDateString('es-DO'),
+    hora_registro: new Date().toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit'}),
+  };
+
+  // Update unit status
+  v.estado = pct === '10' ? 'contrato10' : 'contrato5';
+  v.nota = `Contrato ${pct}% firmado el ${fecha}`;
+  saveV();
+
+  // Save cierre record locally
+  cierres.push(rec);
+  saveCierres();
+
+  // Notify Apps Script (fire and forget)
+  try {
+    fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'registrarCierre', data:rec})});
+  } catch(e){ console.warn('Apps Script error:', e); }
+
+  // Update map and KPIs immediately
+  renderFloors();
+  renderKPIs();
+
+  // Show success screen inside modal
+  const actEl = document.getElementById('m-act');
+  if(actEl){
+    actEl.innerHTML = `<div class="mok">
+      <div class="oico" style="background:${pct==='10'?'var(--teal-l)':'var(--gold-l)'}">
+        <svg viewBox="0 0 24 24" style="stroke:${pct==='10'?'var(--teal)':'var(--gold)'}"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3>¡Contrato ${pct}% Registrado!</h3>
+      <p><strong>${v.cliente||code}</strong> · <strong>${code}</strong></p>
+      <p style="font-size:12px;color:var(--warm)">Fecha: ${fecha} · Monto pagado: USD ${Number(monto).toLocaleString()}</p>
+      ${pct==='10'?`<div style="background:var(--teal-l);border:1px solid var(--teal);border-radius:8px;padding:12px;margin:10px 0;text-align:center">
+        <div style="font-size:11px;color:var(--teal);margin-bottom:4px;font-weight:600">Comisión cobrable ahora</div>
+        <div style="font-size:22px;font-weight:700;color:var(--teal)">USD ${rec.comision_cobrable.toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--teal);margin-top:2px">2.5% del precio de venta</div>
+      </div>`:''}
+      <button class="ok-btn" onclick="closeM();renderFloors();renderKPIs()">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Ver mapa
+      </button>
+    </div>`;
+  }
+}
 
 /* ─── EDITAR DATOS (pendientes / cualquier unidad) ─── */
 function showEditForm(code){
@@ -1704,6 +1903,10 @@ function toggleAdmin(){
     document.getElementById('admin-btn').classList.remove('on');
     document.getElementById('admin-btn').textContent='Admin';
     const p=document.getElementById('admin-panel'); if(p) p.remove();
+    document.getElementById('cierres-btn').style.display='none';
+    // If on cierres panel, go back to main
+    const pc=document.getElementById('p-cierres');
+    if(pc&&pc.classList.contains('on')){ pc.style.display='none'; pc.classList.remove('on'); showMainPanel(); }
     renderFloors(); return;
   }
   const pw=prompt('Contraseña administrador:');
@@ -1711,6 +1914,7 @@ function toggleAdmin(){
   adminOn=true;
   document.getElementById('admin-btn').classList.add('on');
   document.getElementById('admin-btn').textContent='Admin ✓';
+  document.getElementById('cierres-btn').style.display='flex';
   // Insert admin panel
   const panel=document.createElement('div');
   panel.id='admin-panel';
@@ -1838,6 +2042,133 @@ function syncConstructora() {
 }
 
 // Sync on load + every 30 minutes
+/* ─── PANEL CIERRES ─── */
+function fmtN(n){ return Number(n||0).toLocaleString('en-US'); }
+
+let cierresFilter = 'all';
+function filterCierres(f, btn){
+  cierresFilter = f;
+  document.querySelectorAll('#cierres-filtros .etab').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  renderCierres();
+}
+
+function showMainPanel(){
+  document.querySelectorAll('.panel').forEach(p=>{p.style.display='none';p.classList.remove('on');});
+  document.querySelectorAll('.hbtn').forEach(b=>b.classList.remove('on'));
+  // Show main content (floors, kpis, tabs)
+  renderFloors(); renderKPIs();
+}
+
+function showPanelCierres(){
+  // Hide all panels
+  document.querySelectorAll('.panel').forEach(p=>{p.style.display='none';p.classList.remove('on');});
+  document.getElementById('p-cierres').style.display='block';
+  document.getElementById('p-cierres').classList.add('on');
+  document.querySelectorAll('.hbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('cierres-btn').classList.add('on');
+  renderCierres();
+}
+
+function renderCierres(){
+  const filtered = cierres.filter(r=>{
+    if(cierresFilter==='all') return true;
+    if(cierresFilter==='5') return r.pct==='5';
+    if(cierresFilter==='10') return r.pct==='10';
+    return r.edificio===cierresFilter;
+  }).sort((a,b)=>b.id-a.id);
+
+  // Resumen KPIs
+  const total5  = cierres.filter(r=>r.pct==='5').length;
+  const total10 = cierres.filter(r=>r.pct==='10').length;
+  const com_total = cierres.filter(r=>r.pct==='10').reduce((s,r)=>s+(r.comision_cobrable||0),0);
+  document.getElementById('cierres-resumen').innerHTML=`
+    <div style="background:var(--gold-l);border:1px solid var(--gold);border-radius:8px;padding:8px 14px;font-size:12px;text-align:center">
+      <div style="font-weight:700;color:var(--gold);font-size:18px">${total5}</div>
+      <div style="color:var(--warm)">Contratos 5%</div>
+    </div>
+    <div style="background:var(--teal-l);border:1px solid var(--teal);border-radius:8px;padding:8px 14px;font-size:12px;text-align:center">
+      <div style="font-weight:700;color:var(--teal);font-size:18px">${total10}</div>
+      <div style="color:var(--warm)">Contratos 10%</div>
+    </div>
+    <div style="background:var(--green-l);border:1px solid var(--green);border-radius:8px;padding:8px 14px;font-size:12px;text-align:center">
+      <div style="font-weight:700;color:var(--green-d);font-size:18px">USD ${fmtN(com_total)}</div>
+      <div style="color:var(--warm)">Comisiones cobrables</div>
+    </div>`;
+
+  // Update badge
+  const badge = document.getElementById('cierres-badge');
+  if(badge){ const p=cierres.filter(r=>r.pct==='10').length; badge.textContent=p; badge.style.display=p?'inline-block':'none'; }
+
+  if(!filtered.length){
+    document.getElementById('cierres-tabla').innerHTML=`<div style="text-align:center;padding:3rem;color:var(--warm);font-size:14px">No hay cierres registrados aún.</div>`;
+    return;
+  }
+
+  document.getElementById('cierres-tabla').innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="background:var(--ink);color:#fff">
+          <th style="padding:8px 10px;text-align:left;border-radius:8px 0 0 0">Unidad</th>
+          <th style="padding:8px 10px;text-align:left">Cliente</th>
+          <th style="padding:8px 10px;text-align:left">Asesor</th>
+          <th style="padding:8px 10px;text-align:center">Contrato</th>
+          <th style="padding:8px 10px;text-align:right">Precio</th>
+          <th style="padding:8px 10px;text-align:right">Monto Pagado</th>
+          <th style="padding:8px 10px;text-align:right">Com. Total 5%</th>
+          <th style="padding:8px 10px;text-align:right;color:var(--teal)">Com. Cobrable</th>
+          <th style="padding:8px 10px;text-align:left">Fecha Firma</th>
+          ${adminOn?'<th style="padding:8px 10px;border-radius:0 8px 0 0"></th>':''}
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.map((r,i)=>`<tr style="background:${i%2===0?'#fff':'var(--cream)'}">
+          <td style="padding:7px 10px;font-weight:600">${stPill('contrato'+r.pct)} ${r.unidad}</td>
+          <td style="padding:7px 10px">${r.cliente||'—'}</td>
+          <td style="padding:7px 10px;color:var(--warm)">${r.asesor||'—'}</td>
+          <td style="padding:7px 10px;text-align:center">
+            <span style="background:${r.pct==='10'?'var(--teal-l)':'var(--gold-l)'};color:${r.pct==='10'?'var(--teal)':'var(--gold)'};border-radius:12px;padding:2px 10px;font-weight:700">${r.pct}%</span>
+          </td>
+          <td style="padding:7px 10px;text-align:right">USD ${fmtN(r.precio)}</td>
+          <td style="padding:7px 10px;text-align:right">USD ${fmtN(r.monto_pago)}</td>
+          <td style="padding:7px 10px;text-align:right;color:var(--warm)">USD ${fmtN(r.comision_total)}</td>
+          <td style="padding:7px 10px;text-align:right;font-weight:700;color:${r.pct==='10'?'var(--teal)':'var(--warm)'}">
+            ${r.pct==='10'?'USD '+fmtN(r.comision_cobrable):'—'}
+          </td>
+          <td style="padding:7px 10px;color:var(--warm)">${r.fecha_firma||'—'}</td>
+          ${adminOn?`<td style="padding:7px 10px;text-align:center">
+            <button onclick="deleteCierre('${r.id}')" style="background:none;border:1px solid #fca5a5;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;color:#dc2626">🗑</button>
+          </td>`:''}
+        </tr>`).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="background:var(--ink);color:#fff;font-weight:700">
+          <td colspan="6" style="padding:8px 10px">TOTALES (${filtered.length} cierres)</td>
+          <td style="padding:8px 10px;text-align:right">USD ${fmtN(filtered.reduce((s,r)=>s+(r.comision_total||0),0))}</td>
+          <td style="padding:8px 10px;text-align:right;color:var(--teal)">USD ${fmtN(filtered.filter(r=>r.pct==='10').reduce((s,r)=>s+(r.comision_cobrable||0),0))}</td>
+          <td ${adminOn?'colspan="2"':''}></td>
+        </tr>
+      </tfoot>
+    </table>`;
+}
+
+function deleteCierre(id){
+  const rec = cierres.find(r=>String(r.id)===String(id));
+  if(!rec) return;
+  if(!confirm(`¿Borrar el cierre de ${rec.cliente||rec.unidad} (${rec.unidad} · ${rec.pct}%)?`)) return;
+  cierres = cierres.filter(r=>String(r.id)!==String(id));
+  saveCierres();
+  // Revert unit estado back to reservado if it matches
+  const v = gV(rec.unidad);
+  if(v && ['contrato5','contrato10'].includes(v.estado)){
+    v.estado='reservado'; v.nota=''; saveV();
+  }
+  // Notify Apps Script
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'deleteCierre',id:String(id)})});
+  renderFloors(); renderKPIs(); renderCierres();
+}
+
 setTimeout(syncConstructora, 2000);
 setInterval(syncConstructora, 30 * 60 * 1000);
 setInterval(()=>{ checkVencidos(); renderKPIs(); if(document.getElementById('p-coord').classList.contains('on')) renderCoord(); },60000);
@@ -1845,6 +2176,10 @@ setInterval(()=>{ checkVencidos(); renderKPIs(); if(document.getElementById('p-c
 // WL sync — load from sheet on start, then poll every 2 minutes
 setTimeout(loadWLFromSheet, 1500);
 setInterval(loadWLFromSheet, 2 * 60 * 1000);
+
+// Cierres sync — load from sheet on start, then poll every 3 minutes
+setTimeout(loadCierresFromSheet, 2500);
+setInterval(loadCierresFromSheet, 3 * 60 * 1000);
 </script>
 </body>
 </html><span id="sync-indicator" style="font-size:10px;color:rgba(255,255,255,.5);margin-right:8px">📋 Cargando...</span>
