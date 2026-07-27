@@ -1354,10 +1354,10 @@ async function aprobarRes(code){
 }
 
 /* ─── ACTIONS ─── */
-function liberarU(code){ if(!confirm(`¿Liberar ${code}?`)) return; const idx=ventas.findIndex(v=>v.unidad===code); if(idx>=0) ventas.splice(idx,1); saveV();
+function liberarU(code){ if(!confirm(`¿Liberar ${code}?`)) return; const idx=ventas.findIndex(v=>v.unidad===code); if(idx>=0){ const u=ventas[idx]; u.estado='disponible'; u.cliente=''; u.asesor=''; u.nota=''; pushEstado(code); ventas.splice(idx,1); } saveV();
   try { const tsData=JSON.parse(localStorage.getItem('vcb_ts_v1')||'{}'); delete tsData[code]; localStorage.setItem('vcb_ts_v1',JSON.stringify(tsData)); } catch(e) {}
   closeM(); renderFloors(); renderKPIs(); }
-function cambiarSt(code,st){ const v=gV(code); if(!v) return; v.estado=st; if(st==='vendido') delete v.bloqueo_ts; saveV(); closeM(); renderFloors(); renderKPIs(); }
+function cambiarSt(code,st){ const v=gV(code); if(!v) return; v.estado=st; if(st==='vendido') delete v.bloqueo_ts; saveV(); pushEstado(code); closeM(); renderFloors(); renderKPIs(); }
 
 /* ─── CIERRE DE CONTRATO ─── */
 let cierres = JSON.parse(localStorage.getItem('vcb_cierres_v1')||'[]');
@@ -1459,6 +1459,7 @@ function confirmarCierre(code, pct){
   v.estado = pct === '10' ? 'contrato10' : 'contrato5';
   v.nota = `Contrato ${pct}% firmado el ${fecha}`;
   saveV();
+  pushEstado(code);
 
   // Save cierre record locally
   cierres.push(rec);
@@ -2042,7 +2043,51 @@ function syncConstructora() {
 }
 
 // Sync on load + every 30 minutes
-/* ─── PANEL CIERRES ─── */
+/* ─── ESTADOS SYNC — sincroniza cambios de estado de unidades ─── */
+async function loadEstadosFromSheet(){
+  try {
+    const url = SCRIPT_URL + '?action=getEstados&t=' + Date.now();
+    const res = await fetch(url, {method:'GET', mode:'cors'});
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!Array.isArray(data) || !data.length) return;
+    let changed = false;
+    data.forEach(e => {
+      const v = gV(e.unidad);
+      if(!v) return;
+      // Only apply if server state is more "advanced" than current local state
+      const rank = {'disponible':0,'reservado':1,'bloqueado':2,'contrato5':3,'contrato10':4,'vendido':5};
+      const serverRank = rank[e.estado] ?? 0;
+      const localRank  = rank[v.estado]  ?? 0;
+      if(serverRank > localRank || (serverRank === localRank && e.estado !== v.estado)){
+        v.estado  = e.estado;
+        v.nota    = e.nota    || v.nota;
+        v.cliente = e.cliente || v.cliente;
+        v.asesor  = e.asesor  || v.asesor;
+        changed = true;
+      }
+    });
+    if(changed){ saveV(); renderFloors(); renderKPIs(); }
+  } catch(e){ console.warn('Estados sync error:', e.message); }
+}
+
+function pushEstado(unidad){
+  const v = gV(unidad);
+  if(!v) return;
+  const payload = {
+    action: 'pushEstado',
+    data: {
+      unidad:  v.unidad,
+      estado:  v.estado,
+      nota:    v.nota    || '',
+      cliente: v.cliente || '',
+      asesor:  v.asesor  || '',
+      ts:      Date.now(),
+    }
+  };
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)});
+}
 function fmtN(n){ return Number(n||0).toLocaleString('en-US'); }
 
 let cierresFilter = 'all';
@@ -2161,7 +2206,7 @@ function deleteCierre(id){
   // Revert unit estado back to reservado if it matches
   const v = gV(rec.unidad);
   if(v && ['contrato5','contrato10'].includes(v.estado)){
-    v.estado='reservado'; v.nota=''; saveV();
+    v.estado='reservado'; v.nota=''; saveV(); pushEstado(rec.unidad);
   }
   // Notify Apps Script
   fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
@@ -2180,6 +2225,10 @@ setInterval(loadWLFromSheet, 2 * 60 * 1000);
 // Cierres sync — load from sheet on start, then poll every 3 minutes
 setTimeout(loadCierresFromSheet, 2500);
 setInterval(loadCierresFromSheet, 3 * 60 * 1000);
+
+// Estados sync — sync unit state changes every 90 seconds
+setTimeout(loadEstadosFromSheet, 3500);
+setInterval(loadEstadosFromSheet, 90 * 1000);
 </script>
 </body>
 </html><span id="sync-indicator" style="font-size:10px;color:rgba(255,255,255,.5);margin-right:8px">📋 Cargando...</span>
