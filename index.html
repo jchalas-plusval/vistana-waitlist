@@ -83,7 +83,7 @@ h1.pg{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;mar
 .uc.bloqueado{background:var(--amber-l);border-color:var(--amber)}
 .uc.reservado{background:var(--blue-l);border-color:var(--blue)}
 .uc.vendido{background:var(--green-l);border-color:var(--green)}
-.uc.contrato5{background:var(--gold-l);border-color:var(--gold)}
+.uc.contrato5{background:var(--green-l);border-color:var(--green)}
 .uc.contrato10{background:var(--teal-l);border-color:var(--teal)}
 .uc.vencido{background:var(--red-l);border-color:var(--red);animation:pr 2s infinite}
 .uc.constructora{background:#f0f0f0;border-color:#9ca3af;cursor:default}
@@ -102,7 +102,7 @@ h1.pg{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;mar
 .uc-st{font-size:8px;font-weight:600;display:block;margin-top:1px;text-transform:uppercase}
 .uc.disponible .uc-st{color:var(--warm)}.uc.bloqueado .uc-st{color:#854f0b}
 .uc.reservado .uc-st{color:var(--blue)}.uc.vendido .uc-st{color:var(--green-d)}
-.uc.contrato5 .uc-st{color:var(--gold)}.uc.contrato10 .uc-st{color:var(--teal)}
+.uc.contrato5 .uc-st{color:var(--green-d)}.uc.contrato10 .uc-st{color:var(--teal)}
 .uc.vencido .uc-st{color:var(--red)}
 .uc-timer{font-size:8px;font-weight:700;display:block;margin-top:2px;color:#854f0b}
 .uc-timer.urg{color:var(--red)}
@@ -982,7 +982,7 @@ if(_raw16){
     if(!sv) return seedUnit; // new unit in SEED, use SEED
     // Advanced states in localStorage always win over SEED
     // (contrato5, contrato10, vendido, bloqueado = user actions that must persist)
-    const advancedStates = ['contrato5','contrato10','vendido','bloqueado'];
+    const advancedStates = ['contrato5','contrato10','vendido','venta','bloqueado'];
     const localIsAdvanced = advancedStates.includes(sv.estado);
     return {
       ...seedUnit,
@@ -1007,7 +1007,7 @@ if(_raw16){
   ventas = buildFromSeed().map(seedUnit => {
     const sv = savedMap[seedUnit.unidad];
     if(!sv) return seedUnit;
-    const advancedStates = ['contrato5','contrato10','vendido','bloqueado'];
+    const advancedStates = ['contrato5','contrato10','vendido','venta','bloqueado'];
     const localIsAdvanced = advancedStates.includes(sv.estado);
     return {
       ...seedUnit,
@@ -1088,35 +1088,44 @@ function timeLeft(v){
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-function stLabel(st){ return {disponible:'Disponible',bloqueado:'Bloqueado',reservado:'Reservado',vendido:'Vendido',vencido:'Vencido ⚠️',constructora:'Constructora',contrato5:'Contrato 5%',contrato10:'Contrato 10% ✓'}[st]||st; }
-function stPill(st){ const m={disponible:'pk',bloqueado:'pa',reservado:'pb',vendido:'pg',vencido:'pr',constructora:'pc',pendiente:'pn',contrato5:'p5',contrato10:'p10'}; return `<span class="pill ${m[st]||'pk'}">${stLabel(st)}</span>`; }
+function stLabel(st){ return {disponible:'Disponible',reservado:'Reservado',venta:'Venta',vendido:'Venta',constructora:'Constructora',bloqueado:'Reservado',vencido:'Reservado',contrato5:'Venta',contrato10:'Venta',pendiente:'Reservado'}[st]||st; }
+function stPill(st){ const m={disponible:'pk',reservado:'pb',venta:'pg',vendido:'pg',constructora:'pc',bloqueado:'pb',vencido:'pb',contrato5:'pg',contrato10:'pg',pendiente:'pb'}; return `<span class="pill ${m[st]||'pk'}">${stLabel(st)}</span>`; }
 
 /* ─── KPIs ─── */
 function renderKPIs(){
   checkVencidos();
-  const c={total:0,vendido:0,contrato10:0,contrato5:0,reservado:0,bloqueado:0,vencido:0,disponible:0,sin_asesor:0,constructora:0,pendiente:0};
+  // Plusval: reservado=separacion $500, venta=contrato 5%/10% firmado
+  // Constructora: sus propias operaciones
+  const reservadosStates = ['reservado','bloqueado','vencido','pendiente'];
+  const ventasStates     = ['venta','vendido','contrato5','contrato10'];
+  let total=0, plusvalRes=0, plusvalVenta=0, constructora=0, disponible=0;
   Object.keys(CATALOG).forEach(code=>{
     const v=gV(code); const st=v?v.estado:'disponible';
-    c.total++;
-    if(st==='constructora'){
-      c.constructora++;
-    } else if(st==='pendiente'){
-      c.pendiente++;
-    } else {
-      c[st]=(c[st]||0)+1;
-    }
-    if(v && v.estado==='reservado' && !v.cliente) c.sin_asesor++;
+    total++;
+    if(st==='constructora')          constructora++;
+    else if(st==='disponible')        disponible++;
+    else if(ventasStates.includes(st)) plusvalVenta++;
+    else if(reservadosStates.includes(st)) plusvalRes++;
   });
-  document.getElementById('kpis').innerHTML=
-    ['total','reservado','bloqueado','contrato5','contrato10','disponible','constructora','pendiente']
-    .map(k=>`<div class="kpi ${k}"><div class="kpi-n">${c[k]||0}</div><div class="kpi-l">${{total:'Total',reservado:'Reservadas',bloqueado:'Bloqueadas',vencido:'Vencidas ⚠️',disponible:'Disponibles',sin_asesor:'Sin asesor Plusval',constructora:'Constructora',pendiente:'Pendiente liberar',contrato5:'Contrato 5%',contrato10:'Contrato 10% ✓'}[k]}</div></div>`)
-    .join('');
-  const alr=c.vencido||0;
+  const plusvalTotal = plusvalRes + plusvalVenta;
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi total"><div class="kpi-n">${total}</div><div class="kpi-l">Total Unidades</div></div>
+    <div class="kpi reservado" style="position:relative">
+      <div class="kpi-n">${plusvalTotal}</div>
+      <div class="kpi-l">Operaciones Plusval</div>
+      <div style="display:flex;gap:10px;margin-top:6px;justify-content:center;font-size:10px">
+        <span style="color:var(--blue);font-weight:600">${plusvalRes} Reservas</span>
+        <span style="color:var(--green-d);font-weight:600">${plusvalVenta} Ventas</span>
+      </div>
+    </div>
+    <div class="kpi constructora"><div class="kpi-n">${constructora}</div><div class="kpi-l">Operaciones Constructora</div></div>
+    <div class="kpi disponible"><div class="kpi-n">${disponible}</div><div class="kpi-l">Disponibles al Día</div></div>`;
+  const alr=0;
   ['coord-badge','coord-tab-badge'].forEach(id=>{
     const el=document.getElementById(id);
-    if(el){ el.textContent=alr; el.style.display=alr>0?'inline':'none'; }
+    if(el){ el.textContent=alr; el.style.display='none'; }
   });
-  document.getElementById('wl-tab-badge').textContent=wl.length;
+  if(document.getElementById('wl-tab-badge')) document.getElementById('wl-tab-badge').textContent=wl.length;
 }
 
 /* ─── EDIF TABS ─── */
@@ -1234,12 +1243,12 @@ function openM(code, cat, venta){
     </div>`:`<p style="font-size:12px;color:var(--red);text-align:center;padding:8px">⚠️ Contacta a la coordinadora para liberar esta unidad.</p>`;
   } else if(st==='reservado'){
     btns=`<div class="abtns">
-      <button class="abtn btn-apr" onclick="showCierreForm('${code}','5')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Registrar Contrato 5%</button>
-      <button class="abtn btn-res" onclick="showCierreForm('${code}','10')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Registrar Contrato 10%</button>
+      <button class="abtn btn-apr" onclick="showCierreForm('${code}','5')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Registrar Venta (5%)</button>
+      <button class="abtn btn-res" onclick="showCierreForm('${code}','10')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Registrar Venta (10%)</button>
     </div>`;
   } else if(st==='contrato5'){
     btns=`<div class="abtns">
-      <button class="abtn btn-res" onclick="showCierreForm('${code}','10')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Completar al 10%</button>
+      <button class="abtn btn-res" onclick="showCierreForm('${code}','10')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Actualizar Venta al 10%</button>
       ${adminOn?`<button class="abtn btn-lib" onclick="cambiarSt('${code}','reservado')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>Revertir a Reservado</button>`:''}
     </div>`;
   } else if(st==='contrato10'){
@@ -1545,7 +1554,7 @@ function showCierreForm(code, pct){
   const comision_cobrable = pct==='10' ? Math.round(precio * 0.025) : 0;
   document.getElementById('m-act').innerHTML=`
     <div style="background:${pct==='10'?'var(--teal-l)':'var(--gold-l)'};border:1px solid ${pct==='10'?'var(--teal)':'var(--gold)'};border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:11px">
-      <div style="font-weight:700;color:${pct==='10'?'var(--teal)':'var(--gold)'};margin-bottom:4px">Contrato al ${pct}% — ${code}</div>
+      <div style="font-weight:700;color:${pct==='10'?'var(--teal)':'var(--gold)'};margin-bottom:4px">Venta — ${code}</div>
       <div style="color:var(--warm)">Precio: <strong>USD ${fmtN(precio)}</strong> · Comisión total: <strong>USD ${fmtN(comision_total)}</strong>${pct==='10'?' · <strong style="color:var(--teal)">Cobrable ahora: USD '+fmtN(comision_cobrable)+'</strong>':''}</div>
     </div>
     <div class="frow">
@@ -1555,7 +1564,7 @@ function showCierreForm(code, pct){
     <div class="frow fw"><div class="fg"><label>Observaciones</label><textarea id="cf-notas" placeholder="Notas del cierre..."></` + `textarea></div></div>
     <div class="abtns">
       <button class="abtn ${pct==='10'?'btn-res':'btn-apr'}" onclick="confirmarCierre('${code}','${pct}')">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar Contrato ${pct}%
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar Venta
       </button>
       <button class="abtn btn-can" onclick="openM('${code}',CATALOG['${code}'],gV('${code}'))">Cancelar</button>
     </div>`;
@@ -1634,7 +1643,7 @@ function confirmarCierre(code, pct){
       <div class="oico" style="background:${pct==='10'?'var(--teal-l)':'var(--gold-l)'}">
         <svg viewBox="0 0 24 24" style="stroke:${pct==='10'?'var(--teal)':'var(--gold)'}"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <h3>¡Contrato ${pct}% Registrado!</h3>
+      <h3>¡Venta Registrada!</h3>
       <p><strong>${v.cliente||code}</strong> · <strong>${code}</strong></p>
       <p style="font-size:12px;color:var(--warm)">Fecha: ${fecha} · Monto pagado: USD ${Number(monto).toLocaleString()}</p>
       ${pct==='10'?`<div style="background:var(--teal-l);border:1px solid var(--teal);border-radius:8px;padding:12px;margin:10px 0;text-align:center">
@@ -2282,11 +2291,11 @@ function renderCierres(){
   document.getElementById('cierres-resumen').innerHTML=`
     <div style="background:var(--gold-l);border:1px solid var(--gold);border-radius:8px;padding:8px 14px;font-size:12px;text-align:center">
       <div style="font-weight:700;color:var(--gold);font-size:18px">${total5}</div>
-      <div style="color:var(--warm)">Contratos 5%</div>
+      <div style="color:var(--warm)">Ventas (5%)</div>
     </div>
     <div style="background:var(--teal-l);border:1px solid var(--teal);border-radius:8px;padding:8px 14px;font-size:12px;text-align:center">
       <div style="font-weight:700;color:var(--teal);font-size:18px">${total10}</div>
-      <div style="color:var(--warm)">Contratos 10%</div>
+      <div style="color:var(--warm)">Ventas (10%)</div>
     </div>
     <div style="background:var(--green-l);border:1px solid var(--green);border-radius:8px;padding:8px 14px;font-size:12px;text-align:center">
       <div style="font-weight:700;color:var(--green-d);font-size:18px">USD ${fmtN(com_total)}</div>
